@@ -1,7 +1,7 @@
 -- View: public.v_migrated_patients
 
 -- DROP VIEW public.v_migrated_patients;
-DROP VIEW public.v_dummy;
+DROP VIEW public.v_migrated_patients;
 
 CREATE OR REPLACE VIEW public.v_migrated_patients
  AS
