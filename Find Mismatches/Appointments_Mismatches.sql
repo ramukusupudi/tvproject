@@ -8,11 +8,9 @@ SELECT
   'appointments' as source_datasetId,
   source.appointment_uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
- -- target_patients.source_Instanceid as target_id, 
   match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched,
   match_tests.notes
---FROM appointments as source
 FROM v_source_pat_app_loc_pro as source
 FULL JOIN v_migrated_appointments as target ON source.appointment_uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
@@ -20,20 +18,15 @@ CROSS JOIN LATERAL (VALUES
 	('patient',source.p_uid,source.p_uid,'patient_source_instanceid ', target.patient_source_instanceid, null),
 
 	('location',source.location_uid::text,source.location_uid::text,'location_source_instanceid ', target.office_source_instanceid::text, null),
-				
-	--('provider_template', source.app_provider_template::text, source.app_provider_template::text, 'providerTemplate._id', target.providerTemplate_id, null),
-					
+									
 	('date', source.app_date::text, source.app_date::text, 'appointmentDate', target.appointmentdate::text, null),
 					 
   	('time', source.app_time::text, source.app_time::text, 'appointmentTime', target.appointmenttime::text, null),
 					
   	('length', source.app_length::text, source.app_length::text, 'appointmentLength', target.appointmentLength::text, null),
 					
-
-  	('appointmentendtime', (source.app_time + interval '10 minute')::text , (source.app_time + interval '10 minute')::text, 'appointmentendtime', target.appointmentendtime::text, null),					
-  --	('appointmentendtime', (source.app_time + 'interval '||source.app_length||' minute')::text , source.app_time::text, 'appointmentendtime', target.appointmentendtime::text, null),					
-
-					
+	('appointmentendtime', (source.app_time + (source.app_length||' minutes')::interval)::text, (source.app_time + (source.app_length||' minutes')::interval)::text, 'appointmentendtime',target.appointmentendtime::text,null),
+			
 	('confirmed', source.app_confirmed::text, source.app_confirmed::text, 'isconfirmed', target.isconfirmed::text, null),
 
  	('notes', source.app_notes::text, source.app_notes::text, 'notes', target.notes::text, null),
@@ -117,18 +110,12 @@ where  target.source_instanceId is not null
 select source_datasetId, source_field, target_field, matched, notes, count(*)
 from source_target_match
 WHERE  source_datasetId = 'appointments'
-and matched = true
 group by source_datasetId, source_field, target_field, matched, notes
 order by source_field, matched
 
-select source_datasetId, source_field, target_field, matched, notes, count(*)
-from source_target_match
-where  source_datasetId = 'appointments'
-and matched = true
-group by source_datasetId, source_field, target_field, matched, notes
-
 select * from source_target_match
-where source_field = 'provider_template'
+where source_field = 'appointmentendtime'
+and source_datasetid = 'appointments'
 and matched is false
 
 */
