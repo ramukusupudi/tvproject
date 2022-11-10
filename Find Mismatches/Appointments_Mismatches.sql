@@ -21,15 +21,20 @@ CROSS JOIN LATERAL (VALUES
 
 	('location',source.location_uid::text,source.location_uid::text,'location_source_instanceid ', target.office_source_instanceid::text, null),
 				
-	('provider_template', source.app_provider_template::text, source.app_provider_template::text, 'providerTemplate._id', target.providerTemplate_id, null),
+	--('provider_template', source.app_provider_template::text, source.app_provider_template::text, 'providerTemplate._id', target.providerTemplate_id, null),
 					
 	('date', source.app_date::text, source.app_date::text, 'appointmentDate', target.appointmentdate::text, null),
 					 
   	('time', source.app_time::text, source.app_time::text, 'appointmentTime', target.appointmenttime::text, null),
 					
   	('length', source.app_length::text, source.app_length::text, 'appointmentLength', target.appointmentLength::text, null),
+					
 
-  	('confirmed', source.app_confirmed::text, source.app_confirmed::text, 'isconfirmed', target.isconfirmed::text, null),
+  	('appointmentendtime', (source.app_time + interval '10 minute')::text , (source.app_time + interval '10 minute')::text, 'appointmentendtime', target.appointmentendtime::text, null),					
+  --	('appointmentendtime', (source.app_time + 'interval '||source.app_length||' minute')::text , source.app_time::text, 'appointmentendtime', target.appointmentendtime::text, null),					
+
+					
+	('confirmed', source.app_confirmed::text, source.app_confirmed::text, 'isconfirmed', target.isconfirmed::text, null),
 
  	('notes', source.app_notes::text, source.app_notes::text, 'notes', target.notes::text, null),
 					
@@ -41,10 +46,12 @@ CROSS JOIN LATERAL (VALUES
 
 	('provider_uid', source.provider_uid::text, source.provider_uid::text, 'provider_source_instanceid', target.provider_source_instanceid::text, null),
 				
-										
- --	('provider_template', source.app_provider_template::text, source.app_provider_template::text, 'providertemplate_id', target.providertemplate_id::text, null),
+	('isprimarymember', true::text, true::text, 'isprimarymember', target.isprimarymember::text, null),
+	
+	('quickAppointmentflag', false::text, false::text, 'quickAppointmentflag', target.quickAppointmentflag::text, null),	
 					
-				
+	('insurancepayers', '[]'::text, '[]'::text, 'insurancepayers', target.insurancepayers::text, null),					
+			
 					
   ('type', source.app_type, case
        when source.app_type = '1' THEN 'Contact Lens Check'
