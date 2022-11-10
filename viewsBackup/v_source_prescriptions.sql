@@ -1,0 +1,65 @@
+-- View: public.v_source_prescriptions
+
+-- DROP VIEW public.v_source_prescriptions;
+
+CREATE OR REPLACE VIEW public.v_source_prescriptions
+ AS
+ SELECT prescriptions.uid,
+    prescriptions.patient,
+    prescriptions.appointment,
+    prescriptions.r_sph,
+    prescriptions.r_cyl,
+    prescriptions.r_axis,
+    prescriptions.r_prism,
+    prescriptions.r_base,
+    prescriptions.r_add,
+    prescriptions.r_height,
+    prescriptions.r_monopd_d,
+    prescriptions.r_monopd_n,
+    prescriptions.r_ocheight,
+    prescriptions.r_decenter,
+    prescriptions.l_sph,
+    prescriptions.l_cyl,
+    prescriptions.l_axis,
+    prescriptions.l_prism,
+    prescriptions.l_base,
+    prescriptions.l_add,
+    prescriptions.l_height,
+    prescriptions.l_monopd_d,
+    prescriptions.l_monopd_n,
+    prescriptions.l_ocheight,
+    prescriptions.l_decenter,
+    prescriptions.eye,	
+    prescriptions.date,
+    prescriptions.time,
+    prescriptions.created_stamp,
+    prescriptions.updated_stamp,
+    prescriptions.location,
+    prescriptions.location_stamp,
+    prescriptions.notes,
+    prescriptions.provider,
+    prescriptions.r_dn,
+    prescriptions.l_dn,
+    prescriptions.r_cprism,
+    prescriptions.r_cbase,
+    prescriptions.invalid,
+    prescriptions.type,	
+    prescriptions.final_rx,
+    prescriptions.r_vd,
+    prescriptions.r_panto,
+    prescriptions.r_ztilt,
+	prescriptions.l_vd,
+    prescriptions.l_panto,
+    prescriptions.l_ztilt,
+    prescriptions.r_cl,
+    prescriptions.l_cl,
+    prescriptions.employee,
+    prescriptions.lens_type,
+    prescriptions.expiration_date,
+	prescriptions.expiration_reason,
+    prescriptions.signed
+   FROM prescriptions;
+
+ALTER TABLE public.v_source_prescriptions
+    OWNER TO postgres;
+
