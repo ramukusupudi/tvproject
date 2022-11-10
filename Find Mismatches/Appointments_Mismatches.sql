@@ -8,7 +8,7 @@ SELECT
   'appointments' as source_datasetId,
   source.appointment_uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
-  --target_patients.source_Instanceid as target_id, 
+ -- target_patients.source_Instanceid as target_id, 
   match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched,
   match_tests.notes
@@ -104,6 +104,7 @@ CROSS JOIN LATERAL (VALUES
      'type', target.appointmentcode::text, null)					
 					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
+where  target.source_instanceId is not null
 ;
 /*
 select source_datasetId, source_field, target_field, matched, notes, count(*)
