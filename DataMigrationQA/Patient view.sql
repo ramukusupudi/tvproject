@@ -1,0 +1,41 @@
+-- View: public.v_migrated_patients
+
+-- DROP VIEW public.v_migrated_patients;
+DROP VIEW public.v_dummy;
+
+CREATE OR REPLACE VIEW public.v_migrated_patients
+ AS
+ SELECT o.source_datasetid,
+    o.source_instanceid,
+    o.target_model ->> '_id'::text AS _id,
+    o.target_model ->> 'title'::text AS title,
+    o.target_model ->> 'firstName'::text AS firstname,
+    o.target_model ->> 'lastName'::text AS lastname,
+    o.target_model ->> 'nickName'::text AS nickname,
+    o.target_model ->> 'mrn'::text AS mrn,
+    o.target_model ->> 'mi'::text AS mi,
+    o.target_model ->> 'dob'::text AS dob,
+    o.target_model ->> 'age'::text AS age,
+    o.target_model ->> 'sex'::text AS sex,
+    o.target_model ->> 'ssn'::text AS ssn,
+    (o.target_model -> 'patientDetails'::text) ->> 'maritalStatus'::text AS maritalstatus,
+    o.target_model -> 'address'::text AS address,
+    ((o.target_model -> 'address'::text) -> 0) ->> 'zip'::text AS zip,
+    ((o.target_model -> 'address'::text) -> 0) ->> 'city'::text AS city,
+    o.target_model -> 'smokingHistory'::text AS smokinghistory,
+    o.target_model ->> 'contactPrefrence'::text AS contactprefrence,
+    o.target_model ->> 'contactPreferenceReason'::text AS contactpreferencereason,
+    o.target_model -> 'contactInformation'::text AS contactinformation,
+    o.target_model -> 'patientDetails'::text AS patientdetails,
+    o.target_model -> 'notes'::text AS notes,
+    o.target_model -> 'alerts'::text AS alerts,
+    o.target_model -> 'guarantor'::text AS guarantor,
+    o.target_model -> 'emergencyContact'::text AS emergencycontact,
+    o.target_model ->> 'isEmergencyContactAvailable'::text AS isemergencycontactavailable
+   FROM v_migrated_objects o
+  WHERE o.model::text = 'patients'::text;
+
+ALTER TABLE public.v_migrated_patients
+    OWNER TO postgres;
+	select maritalStatus from public.v_migrated_patients
+
