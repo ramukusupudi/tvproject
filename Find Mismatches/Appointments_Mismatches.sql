@@ -43,8 +43,13 @@ CROSS JOIN LATERAL (VALUES
 	
 	('quickAppointmentflag', false::text, false::text, 'quickAppointmentflag', target.quickAppointmentflag::text, null),	
 					
-	('insurancepayers', '[]'::text, '[]'::text, 'insurancepayers', target.insurancepayers::text, null),					
-			
+	('insurancepayers', '[]'::text, '[]'::text, 'insurancepayers', target.insurancepayers::text, null),	
+					
+	('confirmationby', '2818ef11-208b-4f43-b471-06ad495381f1'::text, '2818ef11-208b-4f43-b471-06ad495381f1'::text, 'confirmationby', target.confirmationby::text, null),
+
+	('confirmationdate', '01/01/2000'::text, '01/01/2000'::text, 'confirmationdate', target.confirmationdate::text, null),
+					
+	('confirmationtime', '00:00'::text, '00:00'::text, 'confirmationtime', target.confirmationtime::text, null),					
 					
   ('type', source.app_type, case
        when source.app_type = '1' THEN 'Contact Lens Check'
@@ -114,8 +119,9 @@ group by source_datasetId, source_field, target_field, matched, notes
 order by source_field, matched
 
 select * from source_target_match
-where source_field = 'appointmentendtime'
+where source_field = 'confirmationdate'
 and source_datasetid = 'appointments'
+
 and matched is false
 
 */
