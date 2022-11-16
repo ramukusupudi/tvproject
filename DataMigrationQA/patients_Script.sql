@@ -1,5 +1,5 @@
 --select * from v_source_patients
---select * from v_migrated_patients1
+--select * from v_migrated_patients
 --Select * from source_target_match WHERE  source_datasetId = 'patients';
 --DELETE FROM source_target_match WHERE  source_datasetId = 'patients';
 
@@ -121,12 +121,12 @@ else NULL
      end::text,
      'patientDetails_race', target.patientDetails_race::text, null),
 					
-('ethnicity', source.race, case
-       when source.race = 'Declined to specify' THEN 1
- 	   when source.race = 'Hispanic or Latino' THEN 2
-       when source.race = 'Not Hispanic or Latino' THEN 3
-       when source.race = 'Other' THEN 4
-       when source.race = 'Unknown' THEN 5
+('ethnicity', source.ethnicity, case
+       when source.ethnicity = 'Declined to specify' THEN 1
+ 	   when source.ethnicity = 'Hispanic or Latino' THEN 2
+       when source.ethnicity = 'Not Hispanic or Latino' THEN 3
+       when source.ethnicity = 'Other' THEN 4
+       when source.ethnicity = 'Unknown' THEN 5
  
 					 else NULL 
      end::text,
