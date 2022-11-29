@@ -32,6 +32,7 @@ CROSS JOIN LATERAL (VALUES
     ('sourceR_prism1',source.r_prism::text,source.r_prism::text,'targetR_prism1', target.odprism1, null),
     ('sourceL_prism1',source.l_prism::text,source.l_prism::text,'targetL_prism1', target.osprism1, null),
     ('sourceStartdate',source.date::text,source.date::text,'targetStartdate', target.startdate::text, null),
+	('sourceExpiration_reason',source.expiration_reason::text,source.expiration_reason::text,'targetExpiration_reason', target.changereason, null),			
     ('sourceExpiration_date',source.expiration_date::text,source.expiration_date::text,'targetExpiration_date', target.expirationdate::text, null)
 
 				
@@ -47,7 +48,7 @@ group by source_datasetId, source_field, target_field, matched, notes
 order by source_field, matched
 
 select * from source_target_match
-where source_field = 'sourceStartdate'
+where source_field = 'sourceExpiration_reason'
 and source_datasetid = 'prescriptions'
 
 and matched is false
