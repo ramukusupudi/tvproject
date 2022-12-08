@@ -37,7 +37,7 @@ CROSS JOIN LATERAL (VALUES
 --('null',source.null,source.null,'age ', target.age,null),
 ('sexs', source.sexs, case
        when source.sexs = 'F' THEN '1'
-       when source.sexs = 'M' THEN 2
+       when source.sexs = 'M' THEN '2'
        else NULL 
      end::text,
      'sex', target.sex::text, null),
@@ -93,7 +93,7 @@ else NULL
           													 null),	
 ('bad_phone', source.bad_phone::text, case
        when source.bad_phone = 'true' AND source.homephone is not null then 'true'
-      when source.bad_phone = 'false' then 'false'
+      when source.bad_phone = 'false' AND source.homephone is not null then 'false'
      
        else NULL 
  end::text, case						 
@@ -121,14 +121,15 @@ else NULL
     													    end::text,
           													 null),						
 					
---workphone					
+--workphone	
+				
 ('NS_workphonetype', '', case
  when target.contactinformation_phone_type1 ='2' THEN '2'
  when target.contactinformation_phone_type2 = '2' THEN '2'
  when target.contactinformation_phone_type3 = '2' THEN '2'
  
       													    else NULL 
-    													    end::text,'contactinformation_phone_type1', 
+    													    end::text,'contactinformation_phone_type2', 
  case
  when target.contactinformation_phone_type1 ='2' THEN target.contactinformation_phone_type1
  when target.contactinformation_phone_type2 = '2' THEN target.contactinformation_phone_type2
@@ -137,7 +138,7 @@ else NULL
       													    else NULL 
     													    end::text,
           													 null),
-					
+			
 ('workphone', source.workphone::text, source.workphone::text,'contactinformation_phones_phonenumber2', 
  case
  when target.contactinformation_phone_type1 = '2' THEN target.contactinformation_phones_phonenumber1
@@ -150,7 +151,7 @@ else NULL
 ('preferred_phone', source.preferred_phone::text, case
        when source.preferred_phone = 'workphone' THEN true
        else NULL 
-     end::text,'contactinformation_phone_ispreferred1', 
+     end::text,'contactinformation_phone_ispreferred2', 
 											 case
 											 when target.contactinformation_phone_type1 = '2' THEN target.contactinformation_phone_ispreferred1
 											 when target.contactinformation_phone_type2 = '2' THEN target.contactinformation_phone_ispreferred2
@@ -161,7 +162,7 @@ else NULL
 																										 null),	
 ('bad_phone', source.bad_phone::text, case
        when source.bad_phone = 'true' AND source.workphone is not null then 'true'
-      when source.bad_phone = 'false' then 'false'
+      when source.bad_phone = 'false' AND source.workphone is not null then 'false'
      
        else NULL 
      end::text,case						 
