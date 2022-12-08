@@ -1,4 +1,4 @@
---select * from v_source_employees
+ --select * from v_source_employees
 --select * from v_migrated_employees
 --Select * from source_target_match WHERE  source_datasetId = 'employees';
 --DELETE FROM source_target_match WHERE  source_datasetId = 'employees';
@@ -19,7 +19,7 @@ CROSS JOIN LATERAL (VALUES
 ('lastname',source.lastname,source.lastname,'lastName', target.lastName,null),
 ('employee_number',source.employee_number,source.employee_number,'employeeNumber', target.employeeNumber,null),
 ('mi',source.mi,source.mi,'mi', target.mi,null),
-('birthday',source.birthday::text,source.birthday::text,'dob', target.dob,null),
+('birthday',source.birthday::text,source.birthday::text,'dob', target.dob::text,null),
 ('email',source.email,source.email,'email', target.email,null),
 ('sexs', source.sexs, case
        when source.sexs = 'M' THEN 11
@@ -38,25 +38,35 @@ CROSS JOIN LATERAL (VALUES
 ('cell',source.cell::text,source.cell::text,'cellPhone', target.cellPhone,null),
 --('provider',source.provider,source.provider,'isProvider', target.isProvider,null),
 ('provider', source.provider, case
-       when source.provider = 'null' THEN false
+       when source.provider is null THEN false
  	   else true 
      end::text,
-   'isProvider', target.isProvider::text, null),						
-('direct_address',source.direct_address,source.direct_address,'directAddress', target.directAddress,null),
---one field is expecting here as per mapping doc					
+   'isProvider', target.isProvider::text, null)						
+
+--one field is expecting here as per mapping doc
+/*					
 ('npi_number', source.npi_number::text, case
        when source.npi_number is null THEN '1689670697'
+       else source.npi_number::text
  	   end::text,
    'npi', target.npi::text, null),
-('professional_eq',source.professional_eq,source.professional_eq,'professionalEq', target.professionalEq,null),
-('optical_eq',source.optical_eq,source.optical_eq,'opticalEq', target.opticalEq,null),
-('surgical_eq',source.surgical_eq,source.surgical_eq,'surgicalEq', target.surgicalEq,null),
-('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),
-('on_line',source.on_line::text,source.on_line::text,'onlineProvider', target.onlineProvider,null),
+('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),	
+('location_list',source.location_list,source.location_list,'offices_id1', target.offices_id1,null),
+	
 ('license_ids',source.license_ids::text,source.license_ids::text,'licenseid', target.licenseid,null),
+('direct_address',source.direct_address,source.direct_address,'directAddress', target.directAddress,null),	
+('professional_eq',source.professional_eq,source.professional_eq,'professionalEq', target.professionalEq,null),
+					('optical_eq',source.optical_eq,source.optical_eq,'opticalEq', target.opticalEq,null),
+('surgical_eq',source.surgical_eq,source.surgical_eq,'surgicalEq', target.surgicalEq,null),
+
+('on_line',source.on_line::text,source.on_line::text,'onlineProvider', target.onlineProvider,null),
+
 ('scope',source.scope,source.scope,'license_state', target.license_state,null),
 ('dea_ids',source.dea_ids::text,source.dea_ids::text,'dea', target.dea,null),
-('location_list',source.location_list,source.location_list,'offices_id', target.offices_id,null)
+*/					
+
+
+
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
 /*
