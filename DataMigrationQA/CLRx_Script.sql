@@ -12,7 +12,7 @@ SELECT
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM v_source_CLRx as source
-FULL JOIN v_migrated_CLRx as target ON CONCAT(source.patient,'_',source.insurance)  = target.source_instanceId
+FULL JOIN v_migrated_CLRx as target ON source.exam_uid  = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 ('trial',source.trial,source.trial,'od_t',target.od_t,null),
 ('r_bc',source.r_bc,source.r_bc,'od_bc',target.od_bc,null),
@@ -20,10 +20,10 @@ CROSS JOIN LATERAL (VALUES
 ('r_bc2',source.r_bc2,source.r_bc2,'od_bc2',target.od_bc2,null),
 ('r_axis',source.r_axis,source.r_axis,'od_axis',target.od_axis,null),
 ('r_diameter',source.r_diameter,source.r_diameter,'od_diam',target.od_diam,null),
-('contacts.sku',source.contacts.sku,source.contacts.sku,'od_lens_sku',target.od_lens_sku,null),
-('contacts.name',source.contacts.name,source.contacts.name,'od_lens_name',target.od_lens_name,null),
-('contacts.style',source.contacts.style,source.contacts.style,'od_lens_style',target.od_lens_style,null),
-('contacts.mfg',source.contacts.mfg,source.contacts.mfg,'od_lens_manufacturer',target.od_lens_manufacturer,null),
+('sku',source.sku,source.sku,'od_lens_sku',target.od_lens_sku,null),
+('name',source.name,source.name,'od_lens_name',target.od_lens_name,null),
+('style',source.style,source.style,'od_lens_style',target.od_lens_style,null),
+('mfg',source.mfg,source.mfg,'od_lens_manufacturer',target.od_lens_manufacturer,null),
 ('r_color',source.r_color,source.r_color,'od_color',target.od_color,null),
 ('r_seg',source.r_seg,source.r_seg,'od_segHt',target.od_segHt,null),
 ('r_addon',source.r_addon,source.r_addon,'od_addOns',target.od_addOns,null),
@@ -40,10 +40,10 @@ CROSS JOIN LATERAL (VALUES
 ('l_bc2',source.l_bc2,source.l_bc2,'os_bc2',target.os_bc2,null),
 ('l_axis',source.l_axis,source.l_axis,'os_axis',target.os_axis,null),
 ('l_diameter',source.l_diameter,source.l_diameter,'os_diam',target.os_diam,null),
-('contacts.sku',source.contacts.sku,source.contacts.sku,'os_lens_sku',target.os_lens_sku,null),
-('contacts.name',source.contacts.name,source.contacts.name,'os_lens_name',target.os_lens_name,null),
-('contacts.style',source.contacts.style,source.contacts.style,'os_lens_style',target.os_lens_style,null),
-('contacts.mfg',source.contacts.mfg,source.contacts.mfg,'os_lens_manufacturer',target.os_lens_manufacturer,null),
+('contacts_sku',source.contacts_sku,source.contacts_sku,'os_lens_sku',target.os_lens_sku,null),
+('contacts_name',source.contacts_name,source.contacts_name,'os_lens_name',target.os_lens_name,null),
+('contacts_style',source.contacts_style,source.contacts_style,'os_lens_style',target.os_lens_style,null),
+('contacts_mfg',source.contacts_mfg,source.contacts_mfg,'os_lens_manufacturer',target.os_lens_manufacturer,null),
 ('l_color',source.l_color,source.l_color,'os_color',target.os_color,null),
 ('l_seg',source.l_seg,source.l_seg,'os_segHt',target.os_segHt,null),
 ('l_addon',source.l_addon,source.l_addon,'os_addOns',target.os_addOns,null),
