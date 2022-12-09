@@ -51,8 +51,8 @@ CROSS JOIN LATERAL (VALUES
  	   end::text,
    'npi', target.npi::text, null),
 ('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),	
-('location_list',source.location_list,source.location_list,'offices_id1', target.offices_id1,null),
-	
+('location_list',source.location_list,SPLIT_PART(source.location_list,' ',1),'offices_id1', target.offices_id1,null),
+('location_list',source.location_list,SPLIT_PART(source.location_list,' ',2),'offices_id1', target.offices_id2,null),
 ('license_ids',source.license_ids::text,source.license_ids::text,'licenseid', target.licenseid,null),
 ('direct_address',source.direct_address,source.direct_address,'directAddress', target.directAddress,null),	
 ('professional_eq',source.professional_eq,source.professional_eq,'professionalEq', target.professionalEq,null),
