@@ -8,11 +8,9 @@ SELECT
   'appointments' as source_datasetId,
   source.appointment_uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
-  --target_patients.source_Instanceid as target_id, 
   match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched,
   match_tests.notes
---FROM appointments as source
 FROM v_source_pat_app_loc_pro as source
 FULL JOIN v_migrated_appointments as target ON source.appointment_uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
@@ -20,16 +18,16 @@ CROSS JOIN LATERAL (VALUES
 	('patient',source.p_uid,source.p_uid,'patient_source_instanceid ', target.patient_source_instanceid, null),
 
 	('location',source.location_uid::text,source.location_uid::text,'location_source_instanceid ', target.office_source_instanceid::text, null),
-				
-	('provider_template', source.app_provider_template::text, source.app_provider_template::text, 'providerTemplate._id', target.providerTemplate_id, null),
-					
+									
 	('date', source.app_date::text, source.app_date::text, 'appointmentDate', target.appointmentdate::text, null),
 					 
   	('time', source.app_time::text, source.app_time::text, 'appointmentTime', target.appointmenttime::text, null),
 					
   	('length', source.app_length::text, source.app_length::text, 'appointmentLength', target.appointmentLength::text, null),
-
-  	('confirmed', source.app_confirmed::text, source.app_confirmed::text, 'isconfirmed', target.isconfirmed::text, null),
+					
+	('appointmentendtime', (source.app_time + (source.app_length||' minutes')::interval)::text, (source.app_time + (source.app_length||' minutes')::interval)::text, 'appointmentendtime',target.appointmentendtime::text,null),
+			
+	('confirmed', source.app_confirmed::text, source.app_confirmed::text, 'isconfirmed', target.isconfirmed::text, null),
 
  	('notes', source.app_notes::text, source.app_notes::text, 'notes', target.notes::text, null),
 					
@@ -41,10 +39,17 @@ CROSS JOIN LATERAL (VALUES
 
 	('provider_uid', source.provider_uid::text, source.provider_uid::text, 'provider_source_instanceid', target.provider_source_instanceid::text, null),
 				
-										
- --	('provider_template', source.app_provider_template::text, source.app_provider_template::text, 'providertemplate_id', target.providertemplate_id::text, null),
+	('isprimarymember', true::text, true::text, 'isprimarymember', target.isprimarymember::text, null),
+	
+	('quickAppointmentflag', false::text, false::text, 'quickAppointmentflag', target.quickAppointmentflag::text, null),	
 					
-				
+	('insurancepayers', '[]'::text, '[]'::text, 'insurancepayers', target.insurancepayers::text, null),	
+					
+	('confirmationby', '2818ef11-208b-4f43-b471-06ad495381f1'::text, '2818ef11-208b-4f43-b471-06ad495381f1'::text, 'confirmationby', target.confirmationby::text, null),
+
+	('confirmationdate', '01/01/2000'::text, '01/01/2000'::text, 'confirmationdate', target.confirmationdate::text, null),
+					
+	('confirmationtime', '00:00'::text, '00:00'::text, 'confirmationtime', target.confirmationtime::text, null),					
 					
   ('type', source.app_type, case
        when source.app_type = '1' THEN 'Contact Lens Check'
@@ -104,23 +109,19 @@ CROSS JOIN LATERAL (VALUES
      'type', target.appointmentcode::text, null)					
 					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
+where  target.source_instanceId is not null
 ;
 /*
 select source_datasetId, source_field, target_field, matched, notes, count(*)
 from source_target_match
 WHERE  source_datasetId = 'appointments'
-and matched = true
 group by source_datasetId, source_field, target_field, matched, notes
 order by source_field, matched
 
-select source_datasetId, source_field, target_field, matched, notes, count(*)
-from source_target_match
-where  source_datasetId = 'appointments'
-and matched = true
-group by source_datasetId, source_field, target_field, matched, notes
-
 select * from source_target_match
-where source_field = 'provider_template'
+where source_field = 'confirmationdate'
+and source_datasetid = 'appointments'
+
 and matched is false
 
 */
