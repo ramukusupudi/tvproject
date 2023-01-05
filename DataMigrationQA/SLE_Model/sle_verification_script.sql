@@ -34,27 +34,9 @@ CROSS JOIN LATERAL (VALUES
 ('slx_conj_os',source.slx_conj_os ,case
        when source.slx_conj_os is null THEN source.slx_sclera_os
   when source.slx_sclera_os is null THEN source.slx_conj_os
- when source.slx_conj_os is null AND source.slx_sclera_os is null THEN null
  		when source.slx_conj_os is not null AND source.slx_sclera_os is not null THEN CONCAT(source.slx_conj_os,source.slx_sclera_os)
 	    end::text,'Conjunctiva_OS_notes',target.Conjunctiva_OS_notes,null)
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
-/*
-select source_datasetId, source_field, target_field, matched, notes, count(*)
-from source_target_match
-group by source_datasetId, source_field, target_field, matched, notes
 
-select source_field, target_field, matched, notes, count(*)
-from source_target_match
-where  source_datasetId = 'patients' and target_id is not null
-group by source_datasetId, source_field, target_field, matched, notes
-order by source_field, matched, notes
-
-select source_id, target_id, source_field, source_value, expected_mapped_value, target_field, target_value,notes, matched
-from source_target_match
-where matched = false and source_datasetId = 'patients'and target_id is not null
-order by source_field
-
-select * from source_target_match where matched=false and target_field='dob'
-select dob from v_migrated_patients where source_instanceid = '9E038C19F5C44FC3AD4E7890C43D645E' */
 					
