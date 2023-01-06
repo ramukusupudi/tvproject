@@ -13,7 +13,7 @@ SELECT
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM v_source_autorefraction as source 
-FULL JOIN v_migrated_autorefraction as target ON source._id  = target._id 
+FULL JOIN v_migrated_autorefraction as target ON source.uid = target.source_instanceId
 
 CROSS JOIN LATERAL (VALUES
 

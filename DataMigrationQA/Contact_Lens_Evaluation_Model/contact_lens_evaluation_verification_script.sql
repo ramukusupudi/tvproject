@@ -6,7 +6,7 @@ SELECT
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM v_migrated_patients as source 
-FULL JOIN v_migrated_appointments as target ON source._id  = target.patient_id 
+FULL JOIN v_migrated_appointments as target ON source.uid = target.source_instanceId 
 CROSS JOIN LATERAL (VALUES
 
 ('patient',source.patient,source.patient,'patient_id',target.patient_id,null),
