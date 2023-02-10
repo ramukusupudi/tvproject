@@ -11,13 +11,20 @@ SELECT
 FROM v_source_employees as source
 FULL JOIN v_migrated_employees as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-('designation',source.designation,source.designation,'designation', target.designation,null),
+('designation',source.designation,case    
+ 			when source.designation is null THEN 'Employee'
+            when source.designation is not null THEN source.designation
+   			end::text,
+                              'designation', target.designation,null),
 ('firstname',source.firstname,source.firstname,'firstName', target.firstName,null),
 ('lastname',source.lastname,source.lastname,'lastName', target.lastName,null),
-('employee_number',source.employee_number,source.employee_number,'employeeNumber', target.employeeNumber,null),
+('employee_number',source.employee_number,case    
+ 			when length(source.employee_number::text) >11 THEN LEFT(source.uid,11)
+            when source.employee_number is null THEN LEFT(source.uid,11)
+     end::text,'employeeNumber', target.employeeNumber,null),
 ('mi',source.mi,source.mi,'mi', target.mi,null),
 ('birthday',source.birthday::text,source.birthday::text,'dob', target.dob::text,null),
-('email',source.email,source.email,'email', target.email,null),
+('email',source.email,TRIM(source.email),'email', target.email,null),
 ('sex', source.sex, case
        when source.sex = 'M' THEN 11
  	   when source.sex = 'F' THEN 12
