@@ -1,26 +1,78 @@
 --digitalAssets' Script
---select * from v_source_digitalAssets
---select * from v_migrated_digitalAssets where source_datasetId = 'insurance_cards';
---Select * from source_target_match WHERE  source_datasetId = 'digitalAssets';
---DELETE FROM source_target_match WHERE  source_datasetId = 'digitalAssets';
---SELECT table_schema, table_name, column_name, data_type 
---FROM INFORMATION_SCHEMA.COLUMNS 
---WHERE table_name = 'source_target_match_dummy' 
---select CONCAT(patient,'_',insurance) as p from v_source_digitalAssets
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'digitalAssets' as source_datasetId,
+  'DigitalAssets_ic_front' as source_datasetId,
   source.uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
-FROM v_source_digitalassets as source
-FULL JOIN v_migrated_digitalassets as target ON CONCAT(source.patient,'_',source.insurance)  = target.source_instanceId
+FROM v_source_digitalassets_ic_front as source
+FULL JOIN v_migrated_digitalassets_ic_front as target ON SPLIT_PART(target.source_instanceId,'_',1)  = source.uid
 CROSS JOIN LATERAL (VALUES
-  
-('front',source.front,source.front,'originalfilename', SPLIT_PART(target.originalfilename,'.',1),null),
-('back',source.back,source.back,'originalfilename', SPLIT_PART(target.originalfilename,'.',1),null)
-						
+('name',source.front,Case
+ 				WHEN  source.front is null THEN CONCAT(source.uid,'_front.jpg')
+ 				else source.front
+ 	end::text,'name',target.name,null),					
+('front',source.front,Case
+ 				WHEN  source.front is null THEN CONCAT(source.uid,'_front.jpg')
+ 				else source.front
+ 	end::text,'originalFileName',target.originalFileName,null),						
+('type','',Case
+ 				WHEN  source.front is null THEN 'jpg'
+ 				else SPLIT_PART(source.front,'.',2)
+ 	end::text,'type',target.type,null),					
+('subtype','',Case
+ 				WHEN  source.front is null THEN 'jpg'
+ 				else SPLIT_PART(source.front,'.',2)
+ 	end::text,'subType',target.subType,null)						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
+INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
+SELECT 
+  'DigitalAssets_ic_back' as source_datasetId,
+  CONCAT(source.uid,'_back') as source_id, 
+  match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
+  target._id as target_id, match_tests.target_field, match_tests.target_value,
+  match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
+FROM v_source_digitalassets_ic_back as source
+FULL JOIN v_migrated_digitalassets_ic_back as target ON SPLIT_PART(target.source_instanceId,'_',1)  = source.uid
+CROSS JOIN LATERAL (VALUES
+('name',source.back,Case
+ 				WHEN  source.back is null THEN CONCAT(source.uid,'_back.jpg')
+ 				else source.back
+ 	end::text,'name',target.name,null),					
+('back',source.back,Case
+ 				WHEN  source.back is null THEN CONCAT(source.uid,'_back.jpg')
+ 				else source.back
+ 	end::text,'originalFileName',target.originalFileName,null),						
+('type','',Case
+ 				WHEN  source.back is null THEN 'jpg'
+ 				else SPLIT_PART(source.back,'.',2)
+ 	end::text,'type',target.type,null),					
+('subtype','',Case
+ 				WHEN  source.back is null THEN 'jpg'
+ 				else SPLIT_PART(source.back,'.',2)
+ 	end::text,'subType',target.subType,null)						
+) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
+; 
+
+INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
+SELECT 
+  'DigitalAssets_documents' as source_datasetId,
+  CONCAT(source.uid,'_document') as source_id, 
+  match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
+  target._id as target_id, match_tests.target_field, match_tests.target_value,
+  match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
+FROM v_source_digitalassets_documents as source
+FULL JOIN v_migrated_digitalassets_documents as target ON source.uid  = SPLIT_PART(target.source_instanceId,'_',1)
+CROSS JOIN LATERAL (VALUES
+
+('name',source.filename,source.filename,'name',target.name,null),					
+('filename',source.filename,source.filename,'originalfilename',target.originalfilename,null),				
+('type','',SPLIT_PART(source.filename,'.',2),'type',target.type,null),					
+('subtype','',SPLIT_PART(source.filename,'.',2),'subType',target.subType,null)							
+						
+) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
+; 
