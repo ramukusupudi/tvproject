@@ -1,5 +1,6 @@
 --Employee's Verification Script----
-
+--Delete from source_target_match where source_datasetId='employee'
+--select * from source_target_match where source_id='C97367C07AE1489628945A3C6CFB907E'
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'employee' as source_datasetId,
@@ -19,6 +20,7 @@ CROSS JOIN LATERAL (VALUES
 ('employee_number',source.employee_number,case    
 	when length(source.employee_number::text) >11 THEN LEFT(source.uid,11)
 	when source.employee_number is null THEN LEFT(source.uid,11)
+ 	else source.employee_number
 	end::text,'employeeNumber', target.employeeNumber,null),
 ('mi',source.mi,source.mi,'mi', target.mi,null),
 ('birthday',source.birthday::text,source.birthday::text,'dob', target.dob::text,null),
@@ -48,11 +50,11 @@ CROSS JOIN LATERAL (VALUES
 	end::text,'zip', target.zip,null),
 ('homephone',source.homephone::text,source.homephone::text,'homePhone', target.homePhone,null),
 ('officephone',source.officephone::text,case
-	when source.officephone is null OR length(officephone::text)>10  THEN '1234567890'
+	when length(officephone::text)>10  THEN '1234567890'
+ 	when source.officephone is  null THEN null
 	else source.officephone
 	end::text,'workPhone', target.workPhone,null),
 ('cell',source.cell::text,source.cell::text,'cellPhone', target.cellPhone,null),					
---('provider',source.provider,source.provider,'isProvider', target.isProvider,null),
 ('provider', source.provider, case
 	when source.provider is null THEN false
 	else true 
@@ -64,20 +66,47 @@ CROSS JOIN LATERAL (VALUES
  	   else false 
        end::text,'drfirstcredential', target.drfirstcredential::text, null),	*/	
 					
-('npi_number', source.npi_number::text, case
-	when source.npi_number is null THEN '1689670697'
-	else source.npi_number::text
-	end::text,'npi', target.npi::text, null),
+('npi_number', source.npi_number::text, CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null AND source.npi_number is null THEN '1689670697'
+ WHEN source.provider is not null AND source.npi_number is not null THEN source.npi_number::text
+ end::text,'npi', target.npi::text, null),
 ('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),	
---('location_list',source.location_list,SPLIT_PART(source.location_list,' ',1),'offices_id1', target.offices_id1,null),
+('location_list',source.location_list,SPLIT_PART(source.location_list,' ',1),'office_id', target.office_source_instanceid,null),
+('office_targetId',target.offices_id1,target.offices_id1,'office_id1', target.office_target_id,null),					
 --('location_list',source.location_list,SPLIT_PART(source.location_list,' ',2),'offices_id1', target.offices_id2,null),
-('license_ids',source.license_ids::text,source.license_ids::text,'licenseid', target.licenseid,null),
-('direct_address',source.direct_address,source.direct_address,'directAddress', target.directAddress,null),	
-('professional_eq',source.professional_eq,source.professional_eq,'professionalEq', target.professionalEq,null),
-('optical_eq',source.optical_eq,source.optical_eq,'opticalEq', target.opticalEq,null),
-('surgical_eq',source.surgical_eq,source.surgical_eq,'surgicalEq', target.surgicalEq,null),
-('on_line',source.on_line::text,source.on_line::text,'onlineProvider', target.onlineProvider,null),
-('scope',source.scope,source.scope,'license_state', target.license_state,null)
+('license_ids',source.license_ids::text,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN SPLIT_PART(source.license_ids::text,' ',1)::text
+ end::text,'licenseid', target.provider_source_instanceid,null),
+('provider_targetId',target.licenseid::text,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN target.licenseid::text
+ end::text,'Provider_id', target.provider_target_id,null),					
+('direct_address',source.direct_address,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN source.direct_address
+ end::text,'directAddress', target.directAddress,null),	
+('professional_eq',source.professional_eq,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN source.professional_eq
+ end::text,'professionalEq', target.professionalEq,null),
+('optical_eq',source.optical_eq,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN source.optical_eq
+ end::text,'opticalEq', target.opticalEq,null),
+('surgical_eq',source.surgical_eq,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN source.surgical_eq
+ end::text,'surgicalEq', target.surgicalEq,null),
+('on_line',source.on_line::text,CASE 
+ WHEN source.provider is null THEN false
+ WHEN source.provider is not null THEN source.on_line
+ end::text,'onlineProvider', target.onlineProvider,null),
+('scope',source.scope,CASE 
+ WHEN source.provider is null THEN null
+ WHEN source.provider is not null THEN source.scope
+ end::text,'license_state',target.license_state,null)
 --('dea_ids',source.dea_ids::text,source.dea_ids::text,'dea', target.dea,null)
 
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
