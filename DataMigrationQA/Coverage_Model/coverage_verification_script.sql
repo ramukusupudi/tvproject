@@ -1,4 +1,9 @@
 --Coverage/Insuarnce Script
+--Delete from source_target_match where source_datasetId='coverage'
+--select * from source_target_match where source_id='1B72CF76A790034316C8B1BFEDF79B3F'  source_datasetId='coverage'
+--select count (Distinct source_instanceid) from v_migrated_digitalassets_ic_front where source_instanceid='1B72CF76A790034316C8B1BFEDF79B3F'
+--select ic_uid[1] from v_source_coverage where uid='EA7531A75FBF166F7060506A556F2C8F'
+
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'coverage' as source_datasetId,
@@ -19,12 +24,17 @@ CROSS JOIN LATERAL (VALUES
 	when source.patins_type = '3' THEN 'SUPPLEMENT'
 	when source.patins_type = '4' THEN 'COORDINATED'
 	else 'UNKNOWN'
-	end, 'insurancetype', target.insurancetype, null),																
+	end, 'insurancetype', target.insurancetype, null),															
 --('insurance',source.insurance,source.insurance,'payer_id ', target.payer_id, null),																							
 --  ('plan',source.plan,source.plan,'plan_id ', target.plan_id, null),																							
 -- ('insurance_id',source.insurance_id,source.insurance_id,'insuranceId',target.insuranceId, null),																							
 ('group_number ',source.group_number,source.group_number,'group', target.group, null),																							
-('card_phone ',source.card_phone,LEFT(source.card_phone::text,10),'insPhone', target.insPhone, null),																							
+('card_phone ',source.card_phone,CASE 
+ WHEN LENGTH(source.card_phone::text)>10 THEN LEFT(source.card_phone::text,10)
+ WHEN LENGTH(source.card_phone::text)<10 THEN '1234567890'
+ else source.card_phone::text
+ end,
+ 'insPhone', target.insPhone, null),																							
 /*
 ('ordering', source.ordering::text, case
 when source.ordering = '0' THEN 'PRIMARY'
@@ -38,6 +48,8 @@ end,
 	when source.subscriber_relationship::text = 'CHILD' THEN '110'
 	when source.subscriber_relationship::text = 'GRANDCHILD' THEN '5'
 	when source.subscriber_relationship::text = 'NEPHEW / NIECE' THEN '7'
+ 	when source.subscriber_relationship::text = 'NEPHEW' THEN '7'
+ 	when source.subscriber_relationship::text = 'NIECE' THEN '7'
 	when source.subscriber_relationship::text = 'PARENT' THEN '19'
 	when source.subscriber_relationship::text = 'GRANDPARENT' THEN '4'
 	when source.subscriber_relationship::text = 'DOMESTIC_PARTNER' THEN '53'
@@ -67,24 +79,33 @@ end,
 	end::text,'subscriber_zip', target.subscriber_zip, null),
 ('emailtype','','5','subscriber_emailtype',target.subscriber_emailtype, null),
 ('email',source.email,source.email,'subscriber_email',target.subscriber_email, null),
-('homephonetype','','1','subscriber_homephonetype', case
+('homephonetype','',CASE 
+ 	when source.homephone::text is null THEN null
+ 	when source.homephone::text is not null THEN '1'
+ 	end,'subscriber_homephonetype', case
 	when source.homephone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
 	when source.homephone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
 	when source.homephone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
 	else null
 	end, null),	
-('celltype','','1','subscriber_celltype', case
-	when source.cell::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-	when source.cell::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-	when source.cell::text = target.subscriber_number2 THEN target.subscriber_numbertype2
-	else null
-	end, null),	
-('workphonetype','','2','subscriber_workphonetype', case
-	when source.workphone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-	when source.workphone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-	when source.workphone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
-	else null
-	end, null),					
+('celltype','',CASE 
+ 	when source.cell::text is null THEN null
+ 	when source.cell::text is not null THEN '3'
+ 	end,'subscriber_celltype', case
+		when source.cell::text = target.subscriber_number0 THEN target.subscriber_numbertype0
+		when source.cell::text = target.subscriber_number1 THEN target.subscriber_numbertype1
+		when source.cell::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+		else null
+		end, null),	
+('workphonetype','',CASE 
+ 	when source.workphone::text is null THEN null
+ 	when source.workphone::text is not null THEN '2'
+ 	end,'subscriber_workphonetype', case
+		when source.workphone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
+		when source.workphone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
+		when source.workphone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+		else null
+		end, null),					
 ('homephone',source.homephone::text,source.homephone::text,'subscriber_number0', case
 	when source.homephone::text = target.subscriber_number0 THEN target.subscriber_number0
 	when source.homephone::text = target.subscriber_number1 THEN target.subscriber_number1
@@ -103,9 +124,40 @@ end,
 	when source.cell::text = target.subscriber_number2 THEN target.subscriber_number2
 	else null
 	end, null),
-
+('cov_ic_uid','',CASE 
+ 	when source.ic_uid::text is null THEN null
+ 	else CONCAT(source.ic_uid::text,'_front')
+ 	end,'ins_front_uid', target.ic_front_source_instanceid, null),
+('cov_ins_front_id','',CASE 
+ 	when target.cov_digitalassetsmasterfrontuid::text is null THEN null
+ 	else target.cov_digitalassetsmasterfrontuid
+ 	end,'ins_front_id', target.ic_front_id, null),					
+('cov_front_version','',CASE 
+ 	when target.cov_digitalassetsmasterfrontversion::text is null THEN null
+ 	else target.cov_digitalassetsmasterfrontversion
+ 	end,'ins_front_version', target.ic_front_version, null),	
+('cov_front_filename','',CASE 
+ 	when target.cov_digitalassetsmasterfrontfilename::text is null THEN null
+ 	else target.cov_digitalassetsmasterfrontfilename
+ 	end,'ins_front_filename', target.ic_front_fileName, null)		
+/*('cov_ins_back_id','',CASE 
+ 	when target.digitalassetsmasterbackuid::text is null THEN null
+ 	else target.digitalassetsmasterbackuid
+ 	end,'ins_back_id', target.ic_back_id, null),	
+('cov_ic_uid','',CASE 
+ 	when source.ic_uid::text is null THEN null
+ 	else source.ic_uid::text
+ 	end,'ins_back_uid', target.ic_back_source_instanceid, null),
+('cov_back_version','',CASE 
+ 	when target.ic_back_version::text is null THEN null
+ 	else target.ic_back_version
+ 	end,'ins_back_version', target.digitalassetsmasterbackversion, null),	
+('cov_back_filename','',CASE 
+ 	when target.ic_back_fileName::text is null THEN null
+ 	else target.ic_back_fileName
+ 	end,'ins_back_filename', target.digitalassetsmasterbackfilename, null)*/						
 -- ('ssn',source.ssn,source.ssn,'subscriber_ssn', target.subscriber_ssn, null),
-('notes',source.notes,source.notes,'subscriber_notes', target.subscriber_notes, null)
+--('notes',source.notes,source.notes,'subscriber_notes', target.subscriber_notes, null)
 --('plan_insurance',source.plan_insurance,source.plan_insurance,'planname',target.planname, null),					
 -- ('name',source.name,source.name,'planname',target.planname, null),
 --('phone1',source.phone1::text,source.phone1::text,'planphone', target.planphone, null),
