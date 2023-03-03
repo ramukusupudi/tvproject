@@ -8,7 +8,7 @@ SELECT
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM v_source_patients as source
-FULL JOIN v_migrated_patients_1 as target ON source.uid = target.source_instanceId
+FULL JOIN v_migrated_patients as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
   
 ('designation', source.designation, case
@@ -27,7 +27,7 @@ CROSS JOIN LATERAL (VALUES
 	when source.birthday < current_date THEN source.birthday::text 
 	else '1990-01-01'
 	end::text, 'dob', target.dob::text, null),
-('NS_age','',EXTRACT(year FROM age(current_date::date,birthday::date))::text,'age', target.age,null),
+--('NS_age',(source.birthday::date)::text,EXTRACT(year FROM age('2023-02-25'::date,birthday::date))::text,'age', target.age,null),
 ('sex', source.sex, case
 	when source.sex = 'F' THEN '1'
 	when source.sex = 'M' THEN '2'
@@ -358,11 +358,14 @@ CROSS JOIN LATERAL (VALUES
 	end::text,'guarantor_relationship', target.guarantor_relationship::text, null),
 ('guarantor_releaseHippaInfo',null,'true','guarantor_releaseHippaInfo', target.guarantor_releaseHippaInfo,null),
 ('guar_sex', source.guar_sex, case
--- when source.parent is not null AND THEN target.sex
+    when source.parent is null AND source.sex = 'F' THEN 1
+ 	when source.parent is null AND source.sex = 'M' THEN 2
+ 	when source.parent is null AND source.sex = 'UNK' THEN 3
+ 	when source.parent is null AND source.sex is null THEN 3
 	when  source.guar_sex = 'F' THEN 1
 	when  source.guar_sex = 'M' THEN 2
 	when  source.guar_sex = 'UNK' THEN 3
-	when  source.guar_sex is null THEN 3	
+	when  source.guar_sex is null THEN 3
 	end::text,'guarantor_sex', target.guarantor_sex::text, null),
 --guar_ssn is blocked, 					
 --('guar_ssn', source.guar_ssn, '*****' || RIGHT(source.guar_ssn,4), 'guarantor_ssn', target.guarantor_ssn, null),
@@ -405,14 +408,17 @@ CROSS JOIN LATERAL (VALUES
 ('NS_guar_homephonetype', '',case
 	when source.guar_homephone::text is not null OR source.homephone::text is not null THEN '1'
  	when source.guar_homephone::text is null AND source.homephone::text is null THEN null
+ 	when source.parent::text is not null AND source.guar_cell::text is null THEN null
  	end::text, 'guar_homephonetype', case
 		when target.guarantor_phone_type1::text = '1' THEN target.guarantor_phone_type1
 		when target.guarantor_phone_type2::text = '1' THEN target.guarantor_phone_type2
 		when target.guarantor_phone_type3::text = '1' THEN target.guarantor_phone_type3
 		end::text,null),
 ('NS_guar_celltype', '',case
-	when source.guar_cell::text is not null OR source.cell::text is not null THEN '3'
+ 	when source.parent::text is null AND  source.cell::text is not null THEN '3'
+	when source.parent::text is not null AND source.guar_cell::text is not null THEN '3'
  	when source.guar_cell::text is null AND source.cell::text is null THEN null
+ 	when source.parent::text is not null AND source.guar_cell::text is null THEN null
  	end::text, 'guar_cellphonetype', case
 	when target.guarantor_phone_type1::text = '3' THEN target.guarantor_phone_type1
 	when target.guarantor_phone_type2::text = '3' THEN target.guarantor_phone_type2
@@ -421,6 +427,7 @@ CROSS JOIN LATERAL (VALUES
 ('NS_guar_workphonetype', '',case
 	when source.guar_workphone::text is not null OR source.workphone::text is not null THEN '2'
  	when source.guar_workphone::text is null AND source.workphone::text is null THEN null
+    when source.parent::text is not null AND source.guar_cell::text is null THEN null
  	end::text, 'guar_workphonetype', case
 	when target.guarantor_phone_type1::text = '2' THEN target.guarantor_phone_type1
 	when target.guarantor_phone_type2::text = '2' THEN target.guarantor_phone_type2
