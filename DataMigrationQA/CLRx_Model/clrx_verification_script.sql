@@ -144,7 +144,6 @@ CROSS JOIN LATERAL (VALUES
  	end,'os_color',target.os_color,null),
 ('os_notes',source.notes,CASE 
  	WHEN (source.eye ='2' OR source.eye = '3') AND source.notes::text IS NOT NULL THEN source.notes::text
- --AND source.notes::text is not null  AND source.notes::text != '/null/' THEN source.notes::text
  	WHEN source.notes::text is null OR source.notes::text = '/null/' THEN ''
  	else ''
  	end,'clrx_os_notes',target.clrx_os_notes,null),
