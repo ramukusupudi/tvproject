@@ -1,9 +1,8 @@
---Employee's Verification Script----
---Delete from source_target_match where source_datasetId='employee'
---select * from source_target_match where source_id='C97367C07AE1489628945A3C6CFB907E'
+--Delete from source_target_match where source_datasetId='Employee'
+
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'employee' as source_datasetId,
+  'Employee' as source_datasetId,
   source.uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
@@ -73,7 +72,7 @@ CROSS JOIN LATERAL (VALUES
  end::text,'npi', target.npi::text, null),
 ('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),	
 ('location_list',source.location_list,SPLIT_PART(source.location_list,' ',1),'office_id', target.office_source_instanceid,null),
-('office_targetId',target.offices_id1,target.offices_id1,'office_id1', target.office_target_id,null),					
+('office_targetId',target.offices_id1,target.offices_id1,'target_office_id', target.office_target_id,null),					
 --('location_list',source.location_list,SPLIT_PART(source.location_list,' ',2),'offices_id1', target.offices_id2,null),
 ('license_ids',source.license_ids::text,CASE 
  WHEN source.provider is null THEN null
@@ -100,8 +99,8 @@ CROSS JOIN LATERAL (VALUES
  WHEN source.provider is not null THEN source.surgical_eq
  end::text,'surgicalEq', target.surgicalEq,null),
 ('on_line',source.on_line::text,CASE 
- WHEN source.provider is null THEN false
- WHEN source.provider is not null THEN source.on_line
+ WHEN source.provider is null OR source.on_line is null THEN false
+ WHEN source.provider is not null AND source.on_line is not null THEN source.on_line
  end::text,'onlineProvider', target.onlineProvider,null),
 ('scope',source.scope,CASE 
  WHEN source.provider is null THEN null
