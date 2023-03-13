@@ -1,12 +1,4 @@
---AutoRefraction script
---DELETE FROM source_target_match WHERE  source_datasetId = 'autorefraction';
---
-/*
-select  uid,keratometry_dk_od from v_source_exam_autorefraction where keratometry_dk_od is not null 
-and keratometry_dk_od!='' and keratometry_dk_od='43.300 0'
-select sex from v_migrated_patients where firstname='POP' and lastname='AGUA'
-select sex from v_source_patients where firstname='POP' and lastname='AGUA'
-select * from v_migrated_autorefraction where source_instanceid='F1C3F30DF80DD846E1CCD09B341AD30B_ar' */
+DELETE FROM source_target_match WHERE  source_datasetId = 'autorefraction';
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 

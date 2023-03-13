@@ -1,8 +1,4 @@
---Coverage/Insuarnce Script
---Delete from source_target_match where source_datasetId='coverage'
---select * from source_target_match where source_id='1B72CF76A790034316C8B1BFEDF79B3F'  source_datasetId='coverage'
---select count (Distinct source_instanceid) from v_migrated_digitalassets_ic_front where source_instanceid='1B72CF76A790034316C8B1BFEDF79B3F'
---select ic_uid[1] from v_source_coverage where uid='EA7531A75FBF166F7060506A556F2C8F'
+Delete from source_target_match where source_datasetId='coverage';
 
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
