@@ -1,5 +1,4 @@
---Delete from source_target_match where source_datasetId='patient_notes' 
---Select notes from v_migrated_patient_notes where _id='0c542496-03c4-4c73-b46a-c1f14e9ace5e'
+Delete from source_target_match where source_datasetId='patient_notes'; 
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 

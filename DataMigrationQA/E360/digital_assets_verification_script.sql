@@ -1,4 +1,4 @@
---digitalAssets' Script
+Delete from source_target_match where source_datasetId = 'DigitalAssets_ic_front';
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
@@ -29,6 +29,7 @@ CROSS JOIN LATERAL (VALUES
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
 
+Delete from source_target_match where source_datasetId = 'DigitalAssets_ic_back';
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'DigitalAssets_ic_back' as source_datasetId,
@@ -58,6 +59,7 @@ CROSS JOIN LATERAL (VALUES
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ; 
 
+Delete from source_target_match where source_datasetId = 'DigitalAssets_documents';
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'DigitalAssets_documents' as source_datasetId,
