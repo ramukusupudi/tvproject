@@ -1,4 +1,4 @@
---DELETE FROM source_target_match WHERE  source_datasetId = 'brands'
+DELETE FROM source_target_match WHERE  source_datasetId = 'brands'
 
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, 
 target_id,
