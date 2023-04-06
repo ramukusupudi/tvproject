@@ -1,6 +1,5 @@
 DELETE FROM source_target_match WHERE  source_datasetId = 'patient_hpi';
---select *  FROM source_target_match WHERE  source_datasetId = 'patient_hpi' and matched ='FALSE' and target_value is not null and target_field ='notes'
-select * FROM source_target_match WHERE  source_id='00138E4D70D4A56FE6C7A9A810E587E8'
+
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'patient_hpi' as source_datasetId,

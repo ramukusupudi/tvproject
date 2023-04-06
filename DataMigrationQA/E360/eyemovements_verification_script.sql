@@ -1,4 +1,5 @@
 DELETE FROM source_target_match WHERE  source_datasetId = 'eyemovement';
+
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'eyemovement' as source_datasetId,
