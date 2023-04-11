@@ -25,7 +25,6 @@ CROSS JOIN LATERAL (VALUES
  	   WHEN source.acuity_n_type != 'N' THEN ''
  	   end::text,
    'near_os_cc', target.near_os_cc, null),
---select 	acuity_n_ou,acuity_n_type from 	public.v_source_exam_vision_acuities where uid='10A6ADEFE2821960461B364FCDCAF8DC'		
 ('acuity_n_ou', source.acuity_n_ou, case
        when source.acuity_n_type = 'N' AND source.acuity_n_ou !='/null/' AND  source.acuity_n_ou is not null THEN source.acuity_n_ou
        WHEN source.acuity_n_ou ='/null/' OR source.acuity_n_ou is null OR source.acuity_n_type is null THEN ''
