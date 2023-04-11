@@ -1,3 +1,4 @@
+--CLRx Script
 DELETE FROM source_target_match WHERE  source_datasetId = 'CLRx';
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
@@ -190,7 +191,7 @@ CROSS JOIN LATERAL (VALUES
 ('candm_detail',source.candm_detail,CASE 
  	WHEN source.candm_detail::text is null OR source.candm_detail::text = '/null/' THEN ''
  	else source.candm_detail::text
- 	end,'drawing_notes',target.drawing_notes,null),
+ 	end,'drawing_notes',REPLACE(target.drawing_notes,'\n','\\n'),null),
 ('cpdate',to_char(source.cpdate, 'MM/DD/YYYY'),CASE 
  	WHEN source.cpdate is null OR source.cpdate::text = '/null/' THEN null
  	else to_char(source.cpdate, 'MM/DD/YYYY')
@@ -265,7 +266,23 @@ CROSS JOIN LATERAL (VALUES
 ('expiration_reason',source.expiration_reason,CASE 
  	WHEN source.expiration_reason is null OR source.expiration_reason::text = '/null/' THEN ''
  	else source.expiration_reason::text
- 	end,'data_expiryChangeReason',target.data_expiryChangeReason,null)
+ 	end,'data_expiryChangeReason',target.data_expiryChangeReason,null),
+('r_edge_lift',source.r_edge_lift,CASE 
+ 	WHEN source.r_edge_lift is null OR source.r_edge_lift::text = '/null/' THEN ''
+ 	else source.r_edge_lift::text
+ 	end,'od_edgeLift',target.od_edgeLift,null),
+('l_edge_lift',source.l_edge_lift,CASE 
+ 	WHEN source.l_edge_lift is null OR source.l_edge_lift::text = '/null/' THEN ''
+ 	else source.l_edge_lift::text
+ 	end,'os_edgeLift',target.os_edgeLift,null),
+('l_dn',source.l_dn,CASE 
+ 	WHEN source.l_dn is null OR source.l_dn::text = '/null/' THEN ''
+ 	else source.l_dn::text
+ 	end,'clrx_os_dn',target.clrx_os_dn,null),	
+('r_dn',source.r_dn,CASE 
+ 	WHEN source.r_dn is null OR source.r_dn::text = '/null/' THEN ''
+ 	else source.r_dn::text
+ 	end,'od_dn',target.od_dn,null)					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
 
