@@ -282,8 +282,18 @@ CROSS JOIN LATERAL (VALUES
 ('r_dn',source.r_dn,CASE 
  	WHEN source.r_dn is null OR source.r_dn::text = '/null/' THEN ''
  	else source.r_dn::text
- 	end,'od_dn',target.od_dn,null)					
+ 	end,'od_dn',target.od_dn,null),
+('od_trial',source.trial::text,CASE 
+ 	WHEN source.trial::text is null OR source.trial::text = '/null/' THEN ''
+ 	else source.trial::text
+ 	end,'od_t',target.od_t,null),
+('r_bc',source.r_bc,CASE 
+ 	WHEN source.r_bc is null OR source.r_bc::text = '/null/' THEN ''
+ 	else source.r_bc::text
+ 	end,'od_bc',target.od_bc,null),	
+('r_add',source.r_add,CASE 
+ 	WHEN source.r_add is null OR source.r_add::text = '/null/' THEN ''
+ 	else source.r_add::text
+ 	end,'clrx_od_add',target.clrx_od_add,null)						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
-
-
