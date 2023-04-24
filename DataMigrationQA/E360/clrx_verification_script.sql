@@ -4,12 +4,12 @@ DELETE FROM source_target_match WHERE  source_datasetId = 'CLRx';
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'CLRx' as source_datasetId,
-  CONCAT(source.examsuid,'_',source.cpuid,'_clrx') as source_id, 
+  CONCAT(source.uid,'_',source.cpuid,'_clrx') as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM v_source_exam_clrx as source
-FULL JOIN v_migrated_CLRx as target ON CONCAT(source.examsuid,'_',source.cpuid,'_clrx')  = target.source_instanceId
+FULL JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_',source.cpuid,'_clrx')  = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 ('trial',source.trial::text,source.trial::text,'os_t',target.os_t,null),
 ('r_bc2',source.r_bc2::text,CASE 
@@ -192,9 +192,9 @@ CROSS JOIN LATERAL (VALUES
  	WHEN source.candm_detail::text is null OR source.candm_detail::text = '/null/' THEN ''
  	else source.candm_detail::text
  	end,'drawing_notes',REPLACE(target.drawing_notes,'\n','\\n'),null),
-('cpdate',to_char(source.cpdate, 'MM/DD/YYYY'),CASE 
- 	WHEN source.cpdate is null OR source.cpdate::text = '/null/' THEN null
- 	else to_char(source.cpdate, 'MM/DD/YYYY')
+('date',to_char(source.date, 'MM/DD/YYYY'),CASE 
+ 	WHEN source.date is null OR source.date::text = '/null/' THEN null
+ 	else to_char(source.date, 'MM/DD/YYYY')
  	end,'data_startDate',target.data_startDate,null),
 ('candm',source.candm,CASE
  	WHEN source.candm::text is null then null
@@ -297,3 +297,4 @@ CROSS JOIN LATERAL (VALUES
  	end,'clrx_od_add',target.clrx_od_add,null)						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
