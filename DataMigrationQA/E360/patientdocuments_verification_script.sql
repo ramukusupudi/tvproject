@@ -12,9 +12,10 @@ SELECT
 FROM v_source_patientdocuments as source
 FULL JOIN v_migrated_patientdocuments as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-	('uid', '', CONCAT(source.uid::text,'_',source.patient::text,'_',source.date::text),'digital_assets_id',target.digital_assets_id::text,null),
- 	('filename', source.filename::text, source.filename::text, 'name', target.name::text, null),				
-	('filename', source.filename, case
+	('uid',source.uid,target.source_digital_assets_id,'digital_assets_id',target.digital_assets_id::text,null),
+ 	('filename', source.filename::text, source.filename::text, 'name',CONCAT(split_part(target.name::text,'_',1),'.', split_part(target.name::text,'.',2)), null),				
+	
+					('filename', source.filename, case
 when  split_part(source.filename::text,'.', 2 ) = 'aac'		THEN 'audio/aac'
 when  split_part(source.filename::text,'.', 2 ) = 'abw'		THEN 'application/x-abiword'
 when  split_part(source.filename::text,'.', 2 ) = 'arc'		THEN 'application/x-freearc'
@@ -94,3 +95,21 @@ when  split_part(source.filename::text,'.', 2 ) = '7z'		THEN 'application/x-7z-c
 end::text,'documenttype',target.documenttype::text, null)				
 )as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
+/*
+select source_datasetId, source_field, target_field, matched, notes, count(*)
+from source_target_match
+WHERE  source_datasetId = 'documenttype' and  matched is false
+group by source_datasetId, source_field, target_field, matched, notes
+order by source_field, matched is false
+select * 
+select *
+from source_target_match
+WHERE  source_datasetId = 'appointments'and matched is false and source_id='C42CE3E2A998A0C6A4C984E9E2704DFE'
+
+select * from source_target_match
+where source_field = 'patient_parent'
+and source_datasetid = ''
+and matched is false
+
+*/
