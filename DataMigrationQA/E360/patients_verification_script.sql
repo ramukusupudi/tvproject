@@ -91,13 +91,11 @@ CROSS JOIN LATERAL (VALUES
 	when  source.parent is null AND source.no_call::text='false' AND source.prefs::text IS NULL THEN false	
 	end::text,'guar_contact_phone', target.guar_contact_phone, null), 
 ('guar_prefs_email', source.guar_prefs::text, case
-	--when source.parent is not null AND source.no_call::text='false' AND (2= any(source.guar_prefs))::text='true' THEN true
     when source.parent is not null AND source.no_call::text='false' AND (2= any(source.guar_prefs))::text='true' THEN true
  	when source.parent is not null AND source.no_call::text='false' AND (2= any(source.prefs))::text != 'true' THEN false
     when  source.parent is null AND source.no_call::text='false' AND (2= any(source.prefs))::text = 'true' THEN true
 	when  source.parent is null AND source.no_call::text='false' AND source.prefs::text IS NULL THEN false	
  	end::text,'guar_contact_email', target.guar_contact_email, null),
---select no_call,guar_prefs,(2=any(prefs)) from v_source_patients where uid='F95DA57BC3AE678E26CC8BBD9F8E8733'					
 ('NS_homephonetype', '',case
 	when source.homephone::text is not null THEN '1'
  	when source.homephone::text is null THEN null
