@@ -71,7 +71,10 @@ CROSS JOIN LATERAL (VALUES
  WHEN source.provider is not null AND source.npi_number is not null THEN source.npi_number::text
  end::text,'npi', target.npi::text, null),
 ('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),	
-('location_list',source.location_list,SPLIT_PART(source.location_list,' ',1),'office_id', target.office_source_instanceid,null),
+('location_list',source.location_list,CASE
+ 	WHEN source.location_list IS NULL THEN '8EBBE1B453631CE542B11663626BB007'
+	 WHEN source.location_list IS NOT NULL THEN SPLIT_PART(source.location_list,' ',1)
+	 END,'office_id', target.office_source_instanceid,null),
 ('office_targetId',target.offices_id1,target.offices_id1,'target_office_id', target.office_target_id,null),					
 --('location_list',source.location_list,SPLIT_PART(source.location_list,' ',2),'offices_id1', target.offices_id2,null),
 ('license_ids',source.license_ids::text,CASE 
