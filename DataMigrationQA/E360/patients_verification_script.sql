@@ -1,8 +1,7 @@
-Delete from source_target_match where source_datasetId= 'patients';
-
+Delete from source_target_match where source_datasetId= 'Patients';
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'patients' as source_datasetId,
+  'Patients' as source_datasetId,
   source.uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
@@ -20,7 +19,6 @@ CROSS JOIN LATERAL (VALUES
 	end::text,'title', target.title, null),
 ('firstname',source.firstname,source.firstname,'firstName', target.firstName,null),
 ('lastname',source.lastname,source.lastname,'lastName', target.lastName,null),
---('pat_id',source.pat_id,source.pat_id,'id', target.id,null),
 ('preferred_name',source.preferred_name,source.preferred_name,'nickName', target.nickName,null),
 ('mi',source.mi,source.mi,'mi ', target.mi,null),
 ('birthday', source.birthday::text, case
@@ -35,7 +33,6 @@ CROSS JOIN LATERAL (VALUES
 	else '3' 
 	end::text,
 	'sex', target.sex::text, null),
---ssn is blocked in mapping doc .
 --('ssn', source.ssn, '*****' || RIGHT(source.ssn,4), 'ssn', target.ssn, null),
 ('NS_addresstype','','1','address_type', target.address_type,null),					
 ('address',source.address,source.address,'address_addressLine1', target.address_addressLine1,null),
@@ -82,23 +79,25 @@ CROSS JOIN LATERAL (VALUES
 	else false 
 	end::text,'contact_email', target.contact_email, null), 
 ('guar_prefs_text', source.guar_prefs::text, case
-	when  source.no_call::text='false' AND (0= any(source.guar_prefs))::text = 'true' THEN true
- 	when  source.parent is null AND (0= any(source.prefs))::text = 'true' THEN true
-	else false 
+	when  source.parent is not null AND source.no_call::text='false' AND (0= any(source.guar_prefs))::text = 'true' THEN true
+ 	when  source.parent is not null AND source.no_call::text='false' AND (0= any(source.guar_prefs))::text != 'true' THEN false
+ 	when  source.parent is null AND source.no_call::text='false' AND (0= any(source.prefs))::text = 'true' THEN true
+	when  source.parent is null AND source.no_call::text='false' AND source.prefs::text IS NULL THEN false				
 	end::text,'guar_contact_text', target.guar_contact_text, null), 
 ('guar_prefs_phone', source.guar_prefs::text, case
-	when  source.no_call::text='false' AND (1= any(source.guar_prefs))::text= 'true' THEN true
- 	--when  source.parent is null AND source.no_call::text='false' AND (1= any(source.prefs))::text = 'true' THEN true
- 	when  source.parent is null  AND (1= any(source.prefs))::text = 'true' THEN true
-	else false 
+	when  source.parent is not null AND source.no_call::text='false' AND (1= any(source.guar_prefs))::text= 'true' THEN true
+ 	when  source.parent is not null AND source.no_call::text='false' AND (1= any(source.prefs))::text != 'true' THEN false
+ 	when  source.parent is null AND source.no_call::text='false' AND (1= any(source.prefs))::text = 'true' THEN true
+	when  source.parent is null AND source.no_call::text='false' AND source.prefs::text IS NULL THEN false	
 	end::text,'guar_contact_phone', target.guar_contact_phone, null), 
 ('guar_prefs_email', source.guar_prefs::text, case
-	when source.no_call::text='false' AND (2= any(source.guar_prefs))::text='true' THEN true
- 	--when  source.parent is null AND source.no_call::text='false' AND (2= any(source.prefs))::text = 'true' THEN true
- 	when  source.parent is null  AND (2= any(source.prefs))::text = 'true' THEN true
-	else false 
-	end::text,'guar_contact_email', target.guar_contact_email, null),					
---phonetype
+	--when source.parent is not null AND source.no_call::text='false' AND (2= any(source.guar_prefs))::text='true' THEN true
+    when source.parent is not null AND source.no_call::text='false' AND (2= any(source.guar_prefs))::text='true' THEN true
+ 	when source.parent is not null AND source.no_call::text='false' AND (2= any(source.prefs))::text != 'true' THEN false
+    when  source.parent is null AND source.no_call::text='false' AND (2= any(source.prefs))::text = 'true' THEN true
+	when  source.parent is null AND source.no_call::text='false' AND source.prefs::text IS NULL THEN false	
+ 	end::text,'guar_contact_email', target.guar_contact_email, null),
+--select no_call,guar_prefs,(2=any(prefs)) from v_source_patients where uid='F95DA57BC3AE678E26CC8BBD9F8E8733'					
 ('NS_homephonetype', '',case
 	when source.homephone::text is not null THEN '1'
  	when source.homephone::text is null THEN null
@@ -123,7 +122,6 @@ CROSS JOIN LATERAL (VALUES
 		when target.phone_type2::text = '2' THEN target.phone_type2
 		when target.phone_type3::text = '2' THEN target.phone_type3
 		end::text,null),			
---homephone					
 ('homephone', source.homephone::text,source.homephone::text, 'homephone',case
 	when target.phone_type1::text = '1' THEN target.phonenumber1
 	when target.phone_type2::text = '1' THEN target.phonenumber2
@@ -139,7 +137,6 @@ CROSS JOIN LATERAL (VALUES
 		when target.phone_type3 = '1' THEN target.phone_isbad3
 		else NULL 
 		end::text,null),					
---cell					
 ('cell', source.cell::text, source.cell::text, 'cell', 
 	case
 	when target.phone_type1::text = '3' THEN target.phonenumber1
@@ -156,7 +153,6 @@ CROSS JOIN LATERAL (VALUES
 		when target.phone_type3 = '3' THEN target.phone_isbad3
 		else NULL 
 		end::text,null),	
---workphone	
 ('workphone', source.workphone::text, source.workphone::text,'workphone',case
 	 when target.phone_type1::text = '2' THEN target.phonenumber1
 	 when target.phone_type2::text = '2' THEN target.phonenumber2
@@ -265,8 +261,8 @@ CROSS JOIN LATERAL (VALUES
 	when SPLIT_PART(source.race,',',1) = '' THEN null
 	else 6
 	end::text,'patientDetails_race_1', target.patientDetails_race_1::text, null),
-('race2', source.race, case
-	when SPLIT_PART(source.race,',',2) = 'American Indian or Alaskan Native' THEN 1
+('race2', SPLIT_PART(source.race,',',2), case
+	when SPLIT_PART(source.race,',',2) = 'American Indian or Alaska Native' THEN 1
 	when SPLIT_PART(source.race,',',2) = 'Asian' THEN 2
 	when SPLIT_PART(source.race,',',2) = 'Black or African American' THEN 3
 	when SPLIT_PART(source.race,',',2) = 'Declined to specify' THEN 4
@@ -340,10 +336,6 @@ CROSS JOIN LATERAL (VALUES
 ('parent', source.subscriber_relationship, case
 	when source.subscriber_relationship = 'SELF' THEN 1
  	when source.parent is null THEN 1
- 	--when source.parent is not null THEN 9
-	--when source.subscriber_relationship = 'Son' THEN 2
-	--when source.subscriber_relationship = 'Mother' THEN 3
-	--when source.subscriber_relationship = 'Father' THEN 4
 	when source.subscriber_relationship = 'SPOUSE' THEN 2
  	when source.subscriber_relationship = 'CHILD' THEN 3
  	when source.subscriber_relationship = 'GRANDCHILD' THEN 13
@@ -354,7 +346,6 @@ CROSS JOIN LATERAL (VALUES
  	when source.subscriber_relationship = 'GRANDPARENT' THEN 19
  	when source.subscriber_relationship = 'DOMESTIC_PARTNER' THEN 20
  	when source.subscriber_relationship is null THEN 9
-	--else 9 
 	end::text,'guarantor_relationship', target.guarantor_relationship::text, null),
 ('guarantor_releaseHippaInfo',null,'true','guarantor_releaseHippaInfo', target.guarantor_releaseHippaInfo,null),
 ('guar_sex', source.guar_sex, case
@@ -367,14 +358,17 @@ CROSS JOIN LATERAL (VALUES
 	when  source.guar_sex = 'UNK' THEN 3
 	when  source.guar_sex is null THEN 3
 	end::text,'guarantor_sex', target.guarantor_sex::text, null),
---guar_ssn is blocked, 					
---('guar_ssn', source.guar_ssn, '*****' || RIGHT(source.guar_ssn,4), 'guarantor_ssn', target.guarantor_ssn, null),
+/*('guar_ssn', source.guar_ssn, case 
+ When source.parent is not null THEN ( '*****' || RIGHT(source.guar_ssn,4))
+ When source.parent is null THEN null
+ end, 'guarantor_ssn', target.guarantor_ssn, null),*/
 ('guar_designation', source.guar_designation, case
-	when source.guar_designation = 'Mr.' THEN 2
-	when source.guar_designation = 'Mrs.' THEN 3
-	when source.guar_designation = 'Ms.' THEN 5
-	when source.guar_designation = 'Miss' THEN 4
-	when source.guar_designation = 'Dr.' THEN 1
+    When source.parent is null THEN null
+	when source.parent is not null AND source.guar_designation = 'Mr.' THEN 2
+	when source.parent is not null AND source.guar_designation = 'Mrs.' THEN 3
+	when source.parent is not null AND source.guar_designation = 'Ms.' THEN 5
+	when source.parent is not null AND source.guar_designation = 'Miss' THEN 4
+	when source.parent is not null AND source.guar_designation = 'Dr.' THEN 1
 	end::text,'guarantor_title', target.guarantor_title, null),
 ('NS_guar_addresstype', '', '1','guarantor_address_type', target.guarantor_address_type, null),				
 ('guar_address', source.guar_address, case
@@ -404,11 +398,12 @@ CROSS JOIN LATERAL (VALUES
 	when source.parent is not null AND source.guar_email is null THEN CONCAT(source.uid,'@some.com')
 	when source.parent is not null AND source.guar_email is not null THEN source.guar_email
 	end::text,'guarantor_email', target.guarantor_email, null),	
---guarphonetype
 ('NS_guar_homephonetype', '',case
-	when source.guar_homephone::text is not null OR source.homephone::text is not null THEN '1'
- 	when source.guar_homephone::text is null AND source.homephone::text is null THEN null
- 	when source.parent::text is not null AND source.guar_cell::text is null THEN null
+    WHEN source.parent is null AND source.homephone::text is not null THEN '1'
+	when source.parent is not null AND source.guar_homephone::text is not null THEN '1'
+ 	WHEN source.parent is not null AND (source.guar_homephone::text IS NULL 
+	AND   source.guar_workphone::text IS NULL AND  source.guar_cell::text IS NULL)
+ 	AND source.homephone::text is not null THEN '1'
  	end::text, 'guar_homephonetype', case
 		when target.guarantor_phone_type1::text = '1' THEN target.guarantor_phone_type1
 		when target.guarantor_phone_type2::text = '1' THEN target.guarantor_phone_type2
@@ -417,59 +412,64 @@ CROSS JOIN LATERAL (VALUES
 ('NS_guar_celltype', '',case
  	when source.parent::text is null AND  source.cell::text is not null THEN '3'
 	when source.parent::text is not null AND source.guar_cell::text is not null THEN '3'
- 	when source.guar_cell::text is null AND source.cell::text is null THEN null
- 	when source.parent::text is not null AND source.guar_cell::text is null THEN null
+ 	WHEN source.parent is not null AND (source.guar_homephone::text IS NULL 
+	AND   source.guar_workphone::text IS NULL AND  source.guar_cell::text IS NULL)
+ 	AND source.cell::text is not null THEN '3'
  	end::text, 'guar_cellphonetype', case
 	when target.guarantor_phone_type1::text = '3' THEN target.guarantor_phone_type1
 	when target.guarantor_phone_type2::text = '3' THEN target.guarantor_phone_type2
 	when target.guarantor_phone_type3::text = '3' THEN target.guarantor_phone_type3
 	end::text,null),
 ('NS_guar_workphonetype', '',case
-	when source.guar_workphone::text is not null OR source.workphone::text is not null THEN '2'
- 	when source.guar_workphone::text is null AND source.workphone::text is null THEN null
-    when source.parent::text is not null AND source.guar_cell::text is null THEN null
+  	WHEN source.parent is null AND source.workphone::text is not null THEN '2'
+	when source.parent::text is not null AND source.guar_workphone::text is not null THEN '2'
+   --when source.workphone::text is not null OR source.guar_workphone::text is not null THEN '2'
+ 	WHEN source.parent is not null AND (source.guar_homephone::text IS NULL 
+	AND   source.guar_workphone::text IS NULL AND  source.guar_cell::text IS NULL)
+ 	AND source.workphone::text is not null THEN '2'
  	end::text, 'guar_workphonetype', case
 	when target.guarantor_phone_type1::text = '2' THEN target.guarantor_phone_type1
 	when target.guarantor_phone_type2::text = '2' THEN target.guarantor_phone_type2
 	when target.guarantor_phone_type3::text = '2' THEN target.guarantor_phone_type3
+    else NULL 
 	end::text,null),								
 ('guar_homephone', source.guar_homephone::text, case
-	when source.guar_homephone is null THEN source.homephone
-	else source.guar_homephone
-	end::text,'guarantor_homephone', case
-		when source.guar_homephone::text  = target.guarantor_phone_number1 THEN target.guarantor_phone_number1
-		when source.guar_homephone::text = target.guarantor_phone_number2 THEN target.guarantor_phone_number2
-		when source.guar_homephone::text = target.guarantor_phone_number3 THEN target.guarantor_phone_number3
-		when source.homephone::text  = target.guarantor_phone_number1 THEN target.guarantor_phone_number1
-		when source.homephone::text = target.guarantor_phone_number2 THEN target.guarantor_phone_number2
-		when source.homephone::text = target.guarantor_phone_number3 THEN target.guarantor_phone_number3
+	 WHEN source.parent is null THEN source.homephone::text
+	 when source.parent is not null AND source.guar_homephone::text IS NOT NULL THEN source.guar_homephone::text
+ 	when source.parent is not null AND (source.guar_homephone::text IS NULL 
+ 	AND   source.guar_workphone::text IS NULL AND  source.guar_cell::text IS NULL) THEN source.homephone::text
+ when source.parent is not null AND source.guar_homephone::text IS NULL AND source.homephone::text IS NULL THEN NULL 
+	 end::text,'guarantor_homephone', case
+		when target.guarantor_phone_type1::text = '1' THEN target.guarantor_phone_number1
+		when target.guarantor_phone_type2::text = '1' THEN target.guarantor_phone_number2
+		when target.guarantor_phone_type3::text = '1' THEN target.guarantor_phone_number3
 		else NULL 
 		end::text, null),	
 ('guar_workphone', source.guar_workphone::text, case
-	when source.guar_workphone is null THEN source.workphone
-	else source.guar_workphone
-	end::text,'guarantor_workphone',  case
-		when source.guar_workphone::text = target.guarantor_phone_number1 THEN target.guarantor_phone_number1
-		when source.guar_workphone::text = target.guarantor_phone_number2 THEN target.guarantor_phone_number2
-		when source.guar_workphone::text = target.guarantor_phone_number3 THEN target.guarantor_phone_number3
-		when source.workphone::text = target.guarantor_phone_number1 THEN target.guarantor_phone_number1
-		when source.workphone::text = target.guarantor_phone_number2 THEN target.guarantor_phone_number2
-		when source.workphone::text = target.guarantor_phone_number3 THEN target.guarantor_phone_number3
+		WHEN source.parent is null THEN source.workphone::text
+		when source.parent is not null AND source.guar_workphone::text IS NOT NULL THEN source.guar_workphone::text
+       	when source.parent is not null AND (source.guar_homephone::text IS NULL 
+ 	AND   source.guar_workphone::text IS NULL AND  source.guar_cell::text IS NULL) THEN source.workphone::text 
+        when source.parent is not null AND source.guar_workphone::text IS NULL AND source.workphone::text IS NULL THEN NULL 
+		end::text,'guarantor_workphone',  case
+		when target.guarantor_phone_type1::text = '2' THEN target.guarantor_phone_number1
+		when target.guarantor_phone_type2::text = '2' THEN target.guarantor_phone_number2
+		when target.guarantor_phone_type3::text = '2' THEN target.guarantor_phone_number3
 		else NULL 
 		end::text, null), 	
 ('guar_cell', source.guar_cell::text, case
-	when source.guar_cell is null THEN source.cell
-	else source.guar_cell
+ 	WHEN source.parent is null THEN source.cell::text
+	when source.parent is not null AND source.guar_cell::text IS NOT NULL THEN source.guar_cell::text
+ 		when source.parent is not null AND (source.guar_homephone::text IS NULL 
+ 	AND   source.guar_workphone::text IS NULL AND  source.guar_cell::text IS NULL) THEN source.cell::text
+    when source.parent is not null AND source.guar_cell::text IS NULL AND source.cell::text IS NULL THEN NULL
 	end::text,'guarantor_cell', case
-		when source.guar_cell::text = target.guarantor_phone_number1 THEN target.guarantor_phone_number1
-		when source.guar_cell::text = target.guarantor_phone_number2 THEN target.guarantor_phone_number2
-		when source.guar_cell::text = target.guarantor_phone_number3 THEN target.guarantor_phone_number3
-		when source.cell::text = target.guarantor_phone_number1 THEN target.guarantor_phone_number1
-		when source.cell::text = target.guarantor_phone_number2 THEN target.guarantor_phone_number2
-		when source.cell::text = target.guarantor_phone_number3 THEN target.guarantor_phone_number3
+		when target.guarantor_phone_type1::text = '3' THEN target.guarantor_phone_number1
+		when target.guarantor_phone_type2::text = '3' THEN target.guarantor_phone_number2
+		when target.guarantor_phone_type3::text = '3' THEN target.guarantor_phone_number3
 		else NULL 
 		end::text, null),
-('NS_guar_emailtype', '', '5','guarantor_email_type', target.guarantor_email_type, null)
+('NS_guar_emailtype', '','5','guarantor_email_type', target.guarantor_email_type, null)
 
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
