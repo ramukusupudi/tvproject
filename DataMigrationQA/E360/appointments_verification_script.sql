@@ -26,14 +26,16 @@ CROSS JOIN LATERAL (VALUES
 					
 	('appointmentendtime', '', (source.time + (source.length||' minutes')::interval)::text, 'appointmentendtime',target.appointmentendtime::text,null),
 			
-	('confirmed', source.confirmed::text, source.confirmed::text, 'isconfirmed', target.isconfirmed::text, null),
+	('confirmed', source.confirmed::text, case when source.confirmed is null THEN FALSE
+	                                  when source.confirmed is not null THEN source.confirmed end::text, 'isconfirmed', target.isconfirmed::text, null),
 
  	('notes', source.notes::text, source.notes::text, 'notes', target.notes::text, null),
 					
  	('new_pat', source.new_pat::text, source.new_pat::text, 'new_pat', target.new_pat::text, null),
 
- 	('patient_birthday', source.birthday::text, source.birthday::text, 'patientdob', target.patientdob::text, null),
-	('patient_parent', source.parent::text, source.parent::text, 'guarantor_id', target.guarantor_id::text, null),
+ 	('patient_birthday', source.birthday::text, case when source.birthday > CURRENT_DATE THEN '1990-01-01'
+	                                              when source.birthday <= CURRENT_DATE THEN source.birthday end::text,'patientdob', target.patientdob::text, null),
+	('patient_parent', source.parent::text, source.parent::text,'guarantor_id',target.source_guarantor_id::text, null),
 
 	('provider_uid', source.provider::text, source.provider::text, 'provider_source_instanceid', target.provider_source_instanceid::text, null),
 				
@@ -117,6 +119,7 @@ CROSS JOIN LATERAL (VALUES
 	   when source.type = '86' THEN 'Corneal Refractive Therapy Eval (CRT)'
        when source.type = '87' THEN 'NO_APPOINTMENT'
        when source.type = '88' THEN 'NO_APPOINTMENT'
+       when source.type = '89' THEN 'NO_APPOINTMENT'
      end::text,
      'type', target.Appointmenttype::text, null)					
 					
@@ -126,7 +129,7 @@ where  target.source_instanceId is not null
 /*
 select source_datasetId, source_field, target_field, matched, notes, count(*)
 from source_target_match
-WHERE  source_datasetId = 'appointments'
+WHERE  source_datasetId = 'appointments' and matched is false
 group by source_datasetId, source_field, target_field, matched, notes
 order by source_field, matched is false
 select * 
@@ -135,7 +138,7 @@ from source_target_match
 WHERE  source_datasetId = 'appointments'and matched is false and source_id='C42CE3E2A998A0C6A4C984E9E2704DFE'
 
 select * from source_target_match
-where source_field = 'confirmationdate'
+where source_field = 'provider_uid'
 and source_datasetid = 'appointments'
 and matched is false
 
