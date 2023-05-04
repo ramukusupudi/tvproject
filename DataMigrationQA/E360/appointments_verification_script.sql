@@ -16,8 +16,8 @@ CROSS JOIN LATERAL (VALUES
 					
 	
 	('date', source.date::text, source.date::text, 'appointmentDate', target.appointmentdate::text, null),
-	('patient',source.patient,source.patient,'patient_source_instanceid ', target.patient_source_instanceid, null),
-
+	('patient',source.patient_src,source.patient_src,'patient_source_instanceid ', target.patient_source_instanceid, null),
+    ('encounter_index',source.encounter_index::text, source.encounter_index::text,'encounter', split_part(target.encounter::text, '.', 1), null),					
 	('location',source.location::text,source.location::text,'location_source_instanceid ', target.office_source_instanceid::text, null),
 				 
   	('time', source.time::text, source.time::text, 'appointmentTime', target.appointmenttime::text, null),
