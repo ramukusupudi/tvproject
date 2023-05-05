@@ -16,12 +16,20 @@ CROSS JOIN LATERAL (VALUES
 ('brand_id', source.brand_id::text, source.brand_id::text, 'brandCode', target.code::text, null),
 ('available', source.available::text, source.available::text, 'isavailable', target.isavailable::text, null),
 ('notes', source.notes::text, source.notes::text, 'notes', target.notes::text, null),
-('website', source.website::text, source.website::text, 'website', target.website::text, null),
-('logo_small',CONCAT (source.logo_small,' ' ,source.brand_id),CONCAT(source.logo_small,'_' ,source.brand_id), 'dalogosmlid', target.dalogosmlid::text, null),
-('logo_large',CONCAT (source.logo_large,' ' ,source.brand_id),CONCAT(source.logo_large,'_' ,source.brand_id), 'dalogolarglid', target.dalogolarglid::text, null),
-('icon',CONCAT(source.icon,' ' ,source.brand_id),CONCAT(source.icon,'_' ,source.brand_id), 'daiconid', target.daiconid::text, null),					
+('website', source.website::text, Lower(source.website::text), 'website', target.website::text, null),
+('logo_small',CONCAT (source.logo_small,' ' ,source.brand_id),target.s_dalogosmlid, 'dalogosmlid', target.dalogosmlid::text, null),
+('logo_large',CONCAT (source.logo_large,' ' ,source.brand_id),target.s_dalogolarglid, 'dalogolarglid', target.dalogolarglid::text, null),
+('icon',CONCAT(source.icon,' ' ,source.brand_id),target.s_daiconid,'daiconid', target.daiconid::text, null),					
 ('icon_Name', source.icon::text, source.icon::text, 'daiconfilename', target.daiconfilename::text, null),
 ('logo_small_Name', source.logo_small::text, source.logo_small::text, 'dalogosmlfilename', target.dalogosmlfilename::text, null),
 ('logo_large_Name', source.logo_large::text, source.logo_large::text, 'dalogolargfilename', target.dalogolargfilename::text, null)															
 )as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
+/*select source_datasetId, source_field, target_field, matched, notes, count(*)
+from source_target_match
+WHERE  source_datasetId = 'brands' and matched is false
+group by source_datasetId, source_field, target_field, matched, notes
+order by source_field, matched is false*/
+
+--select * from source_target_match where source_field = 'icon'and source_datasetid = 'brands'and matched is false
