@@ -1,8 +1,8 @@
-Delete from source_target_match where source_datasetId='coverage';
+Delete from source_target_match where source_datasetId='Coverage';
 
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'coverage' as source_datasetId,
+  'Coverage' as source_datasetId,
   source.uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
@@ -27,7 +27,7 @@ CROSS JOIN LATERAL (VALUES
 ('group_number ',source.group_number,source.group_number,'group', target.group, null),																							
 ('card_phone ',source.card_phone,CASE 
  WHEN LENGTH(source.card_phone::text)>10 THEN LEFT(source.card_phone::text,10)
- WHEN LENGTH(source.card_phone::text)<10 THEN '1234567890'
+ WHEN LENGTH(source.card_phone::text)<10 THEN null
  else source.card_phone::text
  end,
  'insPhone', target.insPhone, null),																							
@@ -53,7 +53,7 @@ end,
 	when source.subscriber_relationship::text = 'SIBLING' THEN '113'
 	else '99'
 	end,'subscriberRelation',target.subscriberRelation, null),																							
-('subscriber_relationship', source.subscriber_relationship, case
+('NS_PatientSubscriber', source.subscriber_relationship, case
 	when source.subscriber_relationship = 'SELF' THEN 'true'
 	when source.subscriber_relationship <> 'SELF' THEN 'false'
 	end,'isPatientSubscriber', target.isPatientSubscriber, null),																		
@@ -63,15 +63,17 @@ end,
 ('lastname',source.lastname,source.lastname,'subscriber_lastName', target.subscriber_lastName, null),
 ('birthday',source.birthday::text,case
 	when source.birthday < current_date THEN source.birthday::text 
-	else '1990-01-01'
+	else '01/01/1700'
 	end::text,'subscriber_dob', target.subscriber_dob::text, null),
 ('addresstype','','1','subscriber_addresstype', target.subscriber_addresstype, null),					
 ('address',source.address,source.address,'subscriber_addressLine1', target.subscriber_addressLine1, null),
 ('city',source.city,source.city,'subscriber_city', target.subscriber_city, null),
 ('state',source.state,source.state,'subscriber_state', target.subscriber_state, null),
 ('zip',source.zip::text,case
-	when length(source.zip::text) != 5 THEN '12345'
-	else source.zip 
+ 	when length(source.zip::text) < 5 THEN LPAD(source.zip::text::text, 5, '0')
+    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
+    when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
+	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
 	end::text,'subscriber_zip', target.subscriber_zip, null),
 ('emailtype','','5','subscriber_emailtype',target.subscriber_emailtype, null),
 ('email',source.email,source.email,'subscriber_email',target.subscriber_email, null),
@@ -164,6 +166,7 @@ end,
 
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
 
 
   

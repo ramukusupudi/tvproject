@@ -23,7 +23,7 @@ CROSS JOIN LATERAL (VALUES
 ('mi',source.mi,source.mi,'mi ', target.mi,null),
 ('birthday', source.birthday::text, case
 	when source.birthday < current_date THEN source.birthday::text 
-	else '1990-01-01'
+	else '01/01/1700'
 	end::text, 'dob', target.dob::text, null),
 --('NS_age',(source.birthday::date)::text,EXTRACT(year FROM age('2023-02-25'::date,birthday::date))::text,'age', target.age,null),
 ('sex', source.sex, case
@@ -34,13 +34,19 @@ CROSS JOIN LATERAL (VALUES
 	end::text,
 	'sex', target.sex::text, null),
 --('ssn', source.ssn, '*****' || RIGHT(source.ssn,4), 'ssn', target.ssn, null),
+('ssn', source.ssn, CASE 
+ WHEN source.ssn IS NULL THEN NULL
+ WHEN source.ssn IS NOT NULL THEN '000000000'
+ END,'ssn', target.ssn, null),					
 ('NS_addresstype','','1','address_type', target.address_type,null),					
 ('address',source.address,source.address,'address_addressLine1', target.address_addressLine1,null),
 ('city',source.city,source.city,'address_city ', target.address_city,null),
 ('state',source.state,source.state,'address_state ', target.address_state,null),
 ('zip',source.zip::text,case
-	when length(source.zip::text) != 5 THEN '12345'
-	else source.zip::text 
+	when length(source.zip::text) < 5 THEN LPAD(source.zip::text::text, 5, '0')
+    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
+    when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
+	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
 	end::text,'address_zip ', target.address_zip,null),
 ('NS_address_ispreferred',null,'true','address_ispreferred', target.address_ispreferred,null),
 ('bad_address',source.bad_address::text,source.bad_address::text,'address_badAddress', target.address_badAddress,null),
@@ -255,9 +261,10 @@ CROSS JOIN LATERAL (VALUES
 	when SPLIT_PART(source.race,',',1) = 'Native Hawaiian or Other Pacific Islander' THEN 5
 	when SPLIT_PART(source.race,',',1) = 'Other Race' THEN 6
 	when SPLIT_PART(source.race,',',1) = 'White' THEN 7 
+	when SPLIT_PART(source.race,',',1) = 'Unable to collect' THEN 883
 	when SPLIT_PART(source.race,',',1) is null THEN null
 	when SPLIT_PART(source.race,',',1) = '' THEN null
-	else 6
+	else 883
 	end::text,'patientDetails_race_1', target.patientDetails_race_1::text, null),
 ('race2', SPLIT_PART(source.race,',',2), case
 	when SPLIT_PART(source.race,',',2) = 'American Indian or Alaska Native' THEN 1
@@ -268,9 +275,10 @@ CROSS JOIN LATERAL (VALUES
 	when SPLIT_PART(source.race,',',2) = 'Native Hawaiian or Other Pacific Islander' THEN 5
 	when SPLIT_PART(source.race,',',2) = 'Other Race' THEN 6
 	when SPLIT_PART(source.race,',',2) = 'White' THEN 7 
+ 	when SPLIT_PART(source.race,',',1) = 'Unable to collect' THEN 883
 	when SPLIT_PART(source.race,',',2) is null THEN null
 	when SPLIT_PART(source.race,',',2) = '' THEN null
-	else 6
+	else 883
 	end::text,'patientDetails_race_2', target.patientDetails_race_2::text, null),					
 ('ethnicity1', SPLIT_PART(source.ethnicity,',',1), case
 	when SPLIT_PART(source.ethnicity,',',1) = 'Declined to specify' THEN 1
@@ -281,7 +289,7 @@ CROSS JOIN LATERAL (VALUES
 	when SPLIT_PART(source.ethnicity,',',1) = 'Unknown' THEN 5
 	when SPLIT_PART(source.ethnicity,',',1) is null  THEN null
 	when SPLIT_PART(source.ethnicity,',',1) = ''  THEN null
-	else 4
+	else 5
 	end::text,'patientDetails_ethnicity_1', target.patientDetails_ethnicity_1::text, null),
 ('ethnicity2', SPLIT_PART(source.ethnicity,',',2), case
 	when SPLIT_PART(source.ethnicity,',',2) = 'Declined to specify' THEN 1
@@ -292,7 +300,7 @@ CROSS JOIN LATERAL (VALUES
 	when SPLIT_PART(source.ethnicity,',',2) = 'Unknown' THEN 5
 	when SPLIT_PART(source.ethnicity,',',2) is null  THEN null
 	when SPLIT_PART(source.ethnicity,',',2) = ''  THEN null
-	else 4
+	else 5
 	end::text,'patientDetails_ethnicity_2', target.patientDetails_ethnicity_2::text, null),
 ('new_pat',source.new_pat::text,source.new_pat::text,'patientDetails_isFlagNew', target.patientDetails_isFlagNew,null),
 ('collections',source.collections::text,source.collections::text,'patientDetails_isFlagInCollection', target.patientDetails_isFlagInCollection,null),
@@ -360,6 +368,10 @@ CROSS JOIN LATERAL (VALUES
  When source.parent is not null THEN ( '*****' || RIGHT(source.guar_ssn,4))
  When source.parent is null THEN null
  end, 'guarantor_ssn', target.guarantor_ssn, null),*/
+('guar_ssn', source.guar_ssn, CASE 
+ WHEN source.guar_ssn IS NULL THEN NULL
+ WHEN source.guar_ssn IS NOT NULL THEN '000000000'
+ END,'guarantor_ssn', target.guarantor_ssn, null),						
 ('guar_designation', source.guar_designation, case
     When source.parent is null THEN null
 	when source.parent is not null AND source.guar_designation = 'Mr.' THEN 2
@@ -385,15 +397,18 @@ CROSS JOIN LATERAL (VALUES
 	else source.guar_state
 	end::text,'guarantor_address_state', target.guarantor_address_state, null),	
 ('guar_zip', source.guar_zip::text, case
-	when source.parent is not null AND length(source.guar_zip::text) != 5 THEN '12345'
-	when source.parent is null AND length(source.zip::text) != 5 THEN '12345'
-	when source.parent is null AND length(source.zip::text) = 5 THEN source.zip
- 	when source.parent is not null AND source.guar_zip is null AND length(source.zip::text) = 5 THEN source.zip
-	when source.parent is not null AND length(source.guar_zip::text) = 5 THEN source.guar_zip
+	when  source.parent is null AND length(source.zip::text) < 5 THEN LPAD(source.zip::text, 5, '0')
+    when  source.parent is null AND length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source.zip::text, 9, '0')
+    when  source.parent is null AND length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
+ 	when  source.parent is null AND (length(source.zip::text) = 5 OR length(source.zip::text) = 9 ) THEN source.zip::text
+    when  source.parent is not null AND length(source.zip::text) < 5 THEN LPAD(source.guar_zip::text, 5, '0')
+    when  source.parent is not null AND length(source.zip::text) > 5 AND length(source.guar_zip::text) < 9 THEN LPAD(source.guar_zip::text, 9, '0')
+    when  source.parent is not null AND length(source.zip::text) > 9 THEN substring(source.guar_zip::text, '^\d{1,5}')
+    when  source.parent is not null AND (length(source.zip::text) = 5 OR length(source.zip::text) = 9 ) THEN source.guar_zip::text
 	end::text,'guarantor_address_zip', target.guarantor_address_zip, null),	
 ('guar_email', source.guar_email, case
 	when source.parent is null THEN source.email
-	when source.parent is not null AND source.guar_email is null THEN CONCAT(source.uid,'@some.com')
+	when source.parent is not null AND (source.guar_email is null OR source.guar_email ='') THEN NULL
 	when source.parent is not null AND source.guar_email is not null THEN source.guar_email
 	end::text,'guarantor_email', target.guarantor_email, null),	
 ('NS_guar_homephonetype', '',case

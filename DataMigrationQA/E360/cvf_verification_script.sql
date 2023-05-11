@@ -11,8 +11,9 @@ FROM v_source_exam_cvf as source
 FULL JOIN v_migrated_cvf as target ON CONCAT(source.uid,'_cvf')  = target.source_instanceid 
 CROSS JOIN LATERAL (VALUES
   
---('exams.patient',source.exams.patient,source.exams.patient,'patient_id',target.patient_id,null),
---('exams.date',source.exams.date,source.exams.date,'appointmentDate',target.appointmentDate,null),
+('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
+('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
 ('cvf',source.cvf,CASE
  WHEN source.cvf ='/null/' OR source.cvf is null THEN ''
  ELSE source.cvf

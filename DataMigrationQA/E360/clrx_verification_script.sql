@@ -11,6 +11,9 @@ SELECT
 FROM v_source_exam_clrx as source
 FULL JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_',source.cpuid,'_clrx')  = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
+('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
+('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
 ('trial',source.trial::text,source.trial::text,'os_t',target.os_t,null),
 ('r_bc2',source.r_bc2::text,CASE 
  	WHEN source.r_bc2::text is null THEN ''

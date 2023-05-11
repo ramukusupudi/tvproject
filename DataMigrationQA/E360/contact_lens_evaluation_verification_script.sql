@@ -11,8 +11,9 @@ FROM v_source_exam_contact_lens_evaluation as source
 FULL JOIN  v_migrated_contact_lens_evaluation as target ON CONCAT(source.uid,'_clevaluation') = target.source_instanceId 
 CROSS JOIN LATERAL (VALUES
 
---('patient',source.patient,source.patient,'patient_id',target.patient_id,null),
---('date',source.date,source.date,'appointmentDate',target.appointmentDate,null),
+('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
+('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
 ('candm_detail',source.candm_detail,CASE
 	WHEN source.candm_detail = '/null/' OR source.candm_detail is null  THEN ''
  	ELSE source.candm_detail
