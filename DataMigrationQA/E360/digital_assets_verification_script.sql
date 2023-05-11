@@ -11,19 +11,19 @@ FROM v_source_digitalassets_ic_front as source
 FULL JOIN v_migrated_digitalassets_ic_front as target ON SPLIT_PART(target.source_instanceId,'_',1)  = source.uid
 CROSS JOIN LATERAL (VALUES
 ('name',source.front,Case
- 				WHEN  source.front is null THEN CONCAT(source.uid,'_front.jpg')
+ 				WHEN  source.front is null THEN NULL
  				else source.front
  	end::text,'name',target.name,null),					
 ('front',source.front,Case
- 				WHEN  source.front is null THEN CONCAT(source.uid,'_front.jpg')
+ 				WHEN  source.front is null THEN NULL 
  				else source.front
  	end::text,'originalFileName',target.originalFileName,null),						
 ('type','',Case
- 				WHEN  source.front is null THEN 'jpg'
+ 				WHEN  source.front is null THEN NULL
  				else SPLIT_PART(source.front,'.',2)
  	end::text,'type',target.type,null),					
 ('subtype','',Case
- 				WHEN  source.front is null THEN 'jpg'
+ 				WHEN  source.front is null THEN NULL
  				else SPLIT_PART(source.front,'.',2)
  	end::text,'subType',target.subType,null)						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
@@ -41,19 +41,19 @@ FROM v_source_digitalassets_ic_back as source
 FULL JOIN v_migrated_digitalassets_ic_back as target ON SPLIT_PART(target.source_instanceId,'_',1)  = source.uid
 CROSS JOIN LATERAL (VALUES
 ('name',source.back,Case
- 				WHEN  source.back is null THEN CONCAT(source.uid,'_back.jpg')
+ 				WHEN  source.back is null THEN NULL
  				else source.back
  	end::text,'name',target.name,null),					
 ('back',source.back,Case
- 				WHEN  source.back is null THEN CONCAT(source.uid,'_back.jpg')
+ 				WHEN  source.back is null THEN NULL
  				else source.back
  	end::text,'originalFileName',target.originalFileName,null),						
 ('type','',Case
- 				WHEN  source.back is null THEN 'jpg'
+ 				WHEN  source.back is null THEN NULL
  				else SPLIT_PART(source.back,'.',2)
  	end::text,'type',target.type,null),					
 ('subtype','',Case
- 				WHEN  source.back is null THEN 'jpg'
+ 				WHEN  source.back is null THEN NULL
  				else SPLIT_PART(source.back,'.',2)
  	end::text,'subType',target.subType,null)						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)

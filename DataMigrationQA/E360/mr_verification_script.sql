@@ -11,9 +11,9 @@ SELECT
 FROM v_source_exam_mr as source
 FULL JOIN v_migrated_mr as target ON CONCAT(source.uid,'_mr') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
---('uid',source.uid,source.uid,'source_instanceId', target.source_instanceId,null),
---('patient',source.patient,source.patient,'patient_id ', target.patient_id,null),
---('date',source.date::text,source.date::text,'appointmentDate ', target.appointmentDate,null),
+('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
+('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
 ('manifest_acuity_d_od',source.manifest_acuity_d_od,CASE 
  	WHEN source.manifest_acuity_d_od = '/null/' OR source.manifest_acuity_d_od is null THEN ''
     else source.manifest_acuity_d_od

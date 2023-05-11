@@ -11,8 +11,9 @@ FROM v_source_exam_vital_signs as source
 FULL JOIN v_migrated_vital_signs as target ON CONCAT(source.uid,'_vital_signs')  = target.source_instanceid 
 CROSS JOIN LATERAL (VALUES
   
---('exams.patient',source.exams.patient,source.exams.patient,'patient_id',target.patient_id,null),
---('exams.date',source.exams.date,source.exams.date,'appointmentDate',target.appointmentDate,null),
+('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
+('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
 ('diastolic_bp',source.diastolic_bp,CASE
  WHEN source.diastolic_bp ='/null/' OR source.diastolic_bp is null THEN ''
  ELSE source.diastolic_bp

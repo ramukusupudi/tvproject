@@ -44,8 +44,11 @@ CROSS JOIN LATERAL (VALUES
 	else source.home_state
 	end::text,'address_state', target.address_state,null),
 ('home_zip',source.home_zip::text,case
-	when source.home_zip is null THEN '63011'
-	else source.home_zip
+	--when source.home_zip is null THEN '63011'
+	when length(source.zip::text) < 5 THEN LPAD(source.zip::text::text, 5, '0')
+    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
+    when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
+	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
 	end::text,'zip', target.zip,null),
 ('homephone',source.homephone::text,source.homephone::text,'homePhone', target.homePhone,null),
 ('officephone',source.officephone::text,case
@@ -73,8 +76,8 @@ CROSS JOIN LATERAL (VALUES
 ('contact_eq',source.contact_eq,source.contact_eq,'contactEq', target.contactEq,null),	
 ('location_list',source.location_list,CASE
  	WHEN source.location_list IS NULL THEN '8EBBE1B453631CE542B11663626BB007'
-	 WHEN source.location_list IS NOT NULL THEN SPLIT_PART(source.location_list,' ',1)
-	 END,'office_id', target.office_source_instanceid,null),
+	WHEN source.location_list IS NOT NULL THEN SPLIT_PART(source.location_list,' ',1)
+	END,'office_id', target.office_source_instanceid,null),
 ('office_targetId',target.offices_id1,target.offices_id1,'target_office_id', target.office_target_id,null),					
 --('location_list',source.location_list,SPLIT_PART(source.location_list,' ',2),'offices_id1', target.offices_id2,null),
 ('license_ids',source.license_ids::text,CASE 
