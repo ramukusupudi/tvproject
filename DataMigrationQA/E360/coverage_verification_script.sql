@@ -74,6 +74,7 @@ end,
     when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
     when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
 	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
+ 	when source.zip::text IS NULL THEN '00000' 
 	end::text,'subscriber_zip', target.subscriber_zip, null),
 ('emailtype','','5','subscriber_emailtype',target.subscriber_emailtype, null),
 ('email',source.email,source.email,'subscriber_email',target.subscriber_email, null),

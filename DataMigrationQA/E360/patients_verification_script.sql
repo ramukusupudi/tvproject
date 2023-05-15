@@ -47,7 +47,8 @@ CROSS JOIN LATERAL (VALUES
     when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
     when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
 	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
-	end::text,'address_zip ', target.address_zip,null),
+	when source.zip::text IS NULL THEN '00000'
+ 	end::text,'address_zip ', target.address_zip,null),
 ('NS_address_ispreferred',null,'true','address_ispreferred', target.address_ispreferred,null),
 ('bad_address',source.bad_address::text,source.bad_address::text,'address_badAddress', target.address_badAddress,null),
 ('smoking_status', source.smoking_status, case
@@ -401,11 +402,13 @@ CROSS JOIN LATERAL (VALUES
     when  source.parent is null AND length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source.zip::text, 9, '0')
     when  source.parent is null AND length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
  	when  source.parent is null AND (length(source.zip::text) = 5 OR length(source.zip::text) = 9 ) THEN source.zip::text
-    when  source.parent is not null AND length(source.zip::text) < 5 THEN LPAD(source.guar_zip::text, 5, '0')
-    when  source.parent is not null AND length(source.zip::text) > 5 AND length(source.guar_zip::text) < 9 THEN LPAD(source.guar_zip::text, 9, '0')
-    when  source.parent is not null AND length(source.zip::text) > 9 THEN substring(source.guar_zip::text, '^\d{1,5}')
-    when  source.parent is not null AND (length(source.zip::text) = 5 OR length(source.zip::text) = 9 ) THEN source.guar_zip::text
-	end::text,'guarantor_address_zip', target.guarantor_address_zip, null),	
+    when  source.parent is not null AND length(source.guar_zip::text) < 5 THEN LPAD(source.guar_zip::text, 5, '0')
+    when  source.parent is not null AND length(source.guar_zip::text) > 5 AND length(source.guar_zip::text) < 9 THEN LPAD(source.guar_zip::text, 9, '0')
+    when  source.parent is not null AND length(source.guar_zip::text) > 9 THEN substring(source.guar_zip::text, '^\d{1,5}')
+    when  source.parent is not null AND (length(source.guar_zip::text) = 5 OR length(source.zip::text) = 9 ) THEN source.guar_zip::text
+	when  source.parent is not null AND (source.guar_zip::text) IS NULL THEN '00000' 
+ 	when  source.parent is null AND (source.zip::text) IS NULL THEN '00000' 
+ 	end::text,'guarantor_address_zip', target.guarantor_address_zip, null),	
 ('guar_email', source.guar_email, case
 	when source.parent is null THEN source.email
 	when source.parent is not null AND (source.guar_email is null OR source.guar_email ='') THEN NULL
