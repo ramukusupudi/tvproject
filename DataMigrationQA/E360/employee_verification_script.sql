@@ -49,6 +49,7 @@ CROSS JOIN LATERAL (VALUES
     when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
     when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
 	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
+        when source.zip::text IS NULL THEN '00000'
 	end::text,'zip', target.zip,null),
 ('homephone',source.homephone::text,source.homephone::text,'homePhone', target.homePhone,null),
 ('officephone',source.officephone::text,case
