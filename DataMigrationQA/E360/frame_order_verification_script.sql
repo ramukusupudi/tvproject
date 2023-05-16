@@ -11,9 +11,11 @@ FULL JOIN v_migrated_frame_order as target ON source.uid = target.source_instanc
 CROSS JOIN LATERAL (VALUES
 
 ('patient', source.patient, source.patient,'patient_id', target.patient_id, null),
+('exam_provider', source.exam_provider, source.exam_provider,'exam_provider_id', target.exam_provider_id, null),					
 ('location', source.location, source.location,'office_id', target.office_id, null),
-('itemtype', '', '','itemtype', target.itemtype, null),
-('sku OR sku', source.sku OR sku, source.sku OR sku,'sku', target.sku, null),
+('NS_itemtype', '', 'FRAME','itemtype', target.itemtype, null),
+('sku_src', source.sku_src, source.sku_src,'sku', target.sku, null),
+/*					
 ('rxable', source.rxable, source.rxable,'rxable', target.rxable, null),
 ('notes', source.notes, source.notes,'sku_notes', target.sku_notes, null),
 ('color', source.color, source.color,'color', target.color, null),
@@ -22,7 +24,7 @@ CROSS JOIN LATERAL (VALUES
 ('retail', source.retail, source.retail,'defaultretailprice', target.defaultretailprice, null),
 ('ycode', source.ycode, source.ycode,'ycode', target.ycode, null),
 ('fprice', source.fprice, source.fprice,'ffprice', target.ffprice, null),
-('mfg', source.mfg, source.mfg,'manufacturer_name', target.manufacturer_name, null),
+('mfg_name', source.mfg_name, source.mfg_name,'manufacturer_name', target.manufacturer_name, null),
 ('backorder', source.backorder, source.backorder,'backorder', target.backorder, null),
 ('static', source.static, source.static,'staticflag', target.staticflag, null),
 ('vcode', source.vcode, source.vcode,'vcode', target.vcode, null),
@@ -34,22 +36,39 @@ CROSS JOIN LATERAL (VALUES
 ('dynamic_frame', source.dynamic_frame, source.dynamic_frame,'dynamicframe', target.dynamicframe, null),
 ('do_not_order', source.do_not_order, source.do_not_order,'donotorder', target.donotorder, null),
 ('mfg_line', source.mfg_line, source.mfg_line,'collection', target.collection, null),
-('fcategory_name', source.fcategory_name, source.fcategory_name,'categorycode', target.categorycode, null),
+('category_name', source.category_name, source.category_name,'categorycode', target.categorycode, null),
 ('dbl', source.dbl, source.dbl,'dbi', target.dbi, null),
-('ftype_name', source.ftype_name, source.ftype_name,'typecode', target.typecode, null),
+('frame_type', source.frame_type, source.frame_type,'typecode', target.typecode, null),
 ('eye_size', source.eye_size, source.eye_size,'size', target.size, null),
-('name', source.name, source.name,'name', target.name, null),
+('frame_name', source.frame_name, source.frame_name,'name', target.name, null),
 ('temple', source.temple, source.temple,'temple', target.temple, null),
 ('retail', source.retail, source.retail,'retailprice', target.retailprice, null),
-(' available', source. available, source. available,'defaultavailable', target.defaultavailable, null),
+
+('frames_available', source. available, source. available,'defaultavailable', target.defaultavailable, null), */
+					
 ('order_number', source.order_number, source.order_number,'ordernumber', target.ordernumber, null),
-('dfstatus_name', source.dfstatus_name, source.dfstatus_name,'orderstatus', target.orderstatus, null),
-('order_type', source.order_type, source.order_type,'ordertype', target.ordertype, null),
-('order.job_type + sku +order_status', source.order.job_type + sku +order_status, source.order.job_type + sku +order_status,'itemsource', target.itemsource, null),
+('order_status_name', source.order_status_name, source.order_status_name,'orderstatus', target.orderstatus, null),
+('order_type', '', '10','ordertype', target.ordertype, null),
+---yet to confirm the src fld name					
+('order_job_type', '', CASE 
+	 WHEN source.job_type='E' THEN 'ETB'
+	 WHEN source.job_type !='E' THEN 'SO'
+	 END,'itemsource', target.itemsource, null),					
 ('job_type', source.job_type, source.job_type,'jobtype', target.jobtype, null),
 ('quantity', source.quantity, source.quantity,'quantity', target.quantity, null),
-('flags', source.flags, source.flags,'orderflags', target.orderflags, null),
-('job_flags', source.job_flags, source.job_flags,'jobflags', target.jobflags, null),
+('flags', source.flags, CASE
+	 WHEN source.flags::text ='1000' THEN 'PROBLEM_ORDER'
+	 WHEN source.flags::text ='0100' THEN 'ADDRESS_DIFFERENT'
+	 WHEN source.flags::text ='0010' THEN 'OUTSIDE_LAB'
+	 WHEN source.flags::text ='0001' THEN 'BACKORDER'
+	 WHEN source.flags::text ='0000' THEN ''
+ END,'orderflags', target.orderflags, null),
+('job_flags', source.job_flags, '','jobflags', target.jobflags, null),
 ('notes', source.notes, source.notes,'notes', target.notes, null)
+('auth', source.auth, CASE 
+ 	WHEN source.auth IS NULL OR source.auth ='' THEN ''
+ 	ELSE
+ 	source.auth
+ END,'auth', target.auth, null)					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;					
