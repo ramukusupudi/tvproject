@@ -85,6 +85,7 @@ CROSS JOIN LATERAL (VALUES
 	when  source.no_call::text='false' AND (2= any(source.prefs))::text='true' THEN true
 	else false 
 	end::text,'contact_email', target.contact_email, null), 
+/*					
 ('guar_prefs_text', source.guar_prefs::text, case
 	when  source.parent is not null AND source.no_call::text='false' AND (0= any(source.guar_prefs))::text = 'true' THEN true
  	when  source.parent is not null AND source.no_call::text='false' AND (0= any(source.guar_prefs))::text != 'true' THEN false
@@ -102,7 +103,8 @@ CROSS JOIN LATERAL (VALUES
  	when source.parent is not null AND source.no_call::text='false' AND (2= any(source.prefs))::text != 'true' THEN false
     when  source.parent is null AND source.no_call::text='false' AND (2= any(source.prefs))::text = 'true' THEN true
 	when  source.parent is null AND source.no_call::text='false' AND source.prefs::text IS NULL THEN false	
- 	end::text,'guar_contact_email', target.guar_contact_email, null),
+ 	end::text,'guar_contact_email', target.guar_contact_email, null),  
+					*/
 ('NS_homephonetype', '',case
 	when source.homephone::text is not null THEN '1'
  	when source.homephone::text is null THEN null
