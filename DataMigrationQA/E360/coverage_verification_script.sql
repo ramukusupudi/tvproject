@@ -63,7 +63,7 @@ end,
 ('lastname',source.lastname,source.lastname,'subscriber_lastName', target.subscriber_lastName, null),
 ('birthday',source.birthday::text,case
 	when source.birthday < current_date THEN source.birthday::text 
-	else '01/01/1700'
+	else '1700-01-01'
 	end::text,'subscriber_dob', target.subscriber_dob::text, null),
 ('addresstype','','1','subscriber_addresstype', target.subscriber_addresstype, null),					
 ('address',source.address,source.address,'subscriber_addressLine1', target.subscriber_addressLine1, null),
@@ -71,7 +71,7 @@ end,
 ('state',source.state,source.state,'subscriber_state', target.subscriber_state, null),
 ('zip',source.zip::text,case
  	when length(source.zip::text) < 5 THEN LPAD(source.zip::text::text, 5, '0')
-    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
+    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source.zip::text::text, 9, '0')
     when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
 	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
  	when source.zip::text IS NULL THEN '00000' 

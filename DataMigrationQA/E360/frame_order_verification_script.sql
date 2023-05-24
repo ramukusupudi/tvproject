@@ -1,20 +1,23 @@
---Delete from source_target_match where source_datasetId= 'Frame Order'
+Delete from source_target_match where source_datasetId= 'FrameOrder';
+
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'Frame Order' as source_datasetId,
+  'FrameOrder' as source_datasetId,
   source.uid as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
-FROM v_source_frame_order as source
+FROM v_source_frame as source
 FULL JOIN v_migrated_frame_order as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 
-('patient', source.patient, source.patient,'patient_id', target.patient_id, null),
-('exam_provider', source.exam_provider, source.exam_provider,'exam_provider_id', target.exam_provider_id, null),					
-('location', source.location, source.location,'office_id', target.office_id, null),
-('NS_itemtype', '', 'FRAME','itemtype', target.itemtype, null),
-('sku_src', source.sku_src, source.sku_src,'sku', target.sku, null),
+('patient_src', source.patient_src, source.patient_src,'patient_src_id', target.Patient_src_id, null),
+--('exam_provider', source.exam_provider, source.exam_provider,'provider_id', target.provider_id, null),					
+('exam_provider_id', target.exam_provider_id, target.exam_provider_id,'provider_id', target.exam_provider_id, null),					
+('location', source.location, source.location,'office_src_id', target.office_src_id, null),
+('office', target.office_id, target.office_id,'office', target.office_mdl_id, null),					
+('NS_itemtype', '', 'FRAME','frame_itemtype', target.itemtype, null),
+('sku_src', source.sku_src::text, source.sku_src::text,'frame_sku', target.sku, null),
 /*					
 ('rxable', source.rxable, source.rxable,'rxable', target.rxable, null),
 ('notes', source.notes, source.notes,'sku_notes', target.sku_notes, null),
@@ -46,29 +49,40 @@ CROSS JOIN LATERAL (VALUES
 
 ('frames_available', source. available, source. available,'defaultavailable', target.defaultavailable, null), */
 					
-('order_number', source.order_number, source.order_number,'ordernumber', target.ordernumber, null),
-('order_status_name', source.order_status_name, source.order_status_name,'orderstatus', target.orderstatus, null),
-('order_type', '', '10','ordertype', target.ordertype, null),
+('order_number', source.order_number, source.order_number,'frame_ordernumber', target.ordernumber, null),
+('order_status_name', source.order_status_name, CASE
+	 WHEN source.order_status_name = 'Canceled' THEN 'CANCELLED' 
+ 	 WHEN source.order_status_name = 'Received by patient' THEN 'RECEIVED_BY_PATIENT' 
+ 	 WHEN source.order_status_name = 'On order from distribution' THEN 'ON_ORDER_FROM_DISTRIBUTION'
+     WHEN source.order_status_name = 'Received by Office' THEN 'RECEIVED_BY_OFFICE' 
+	 WHEN source.order_status_name = 'On order from vendor' THEN 'ON_ORDER_FROM_VENDOR' 
+	 WHEN source.order_status_name = 'Order Replaced' THEN 'LAB_REDO' 
+	 WHEN source.order_status_name = 'Taken From Stock' THEN 'TAKEN_FROM_STOCK'
+ 	 ELSE 'ON_ORDER_FROM_DISTRIBUTION'
+	 END,'frame_orderstatus', target.orderstatus, null),
+('order_type', '', 'FRAME','frame_ordertype', target.ordertype, null),
 ---yet to confirm the src fld name					
 ('order_job_type', '', CASE 
 	 WHEN source.job_type='E' THEN 'ETB'
 	 WHEN source.job_type !='E' THEN 'SO'
-	 END,'itemsource', target.itemsource, null),					
-('job_type', source.job_type, source.job_type,'jobtype', target.jobtype, null),
-('quantity', source.quantity, source.quantity,'quantity', target.quantity, null),
+ 	 WHEN source.job_type IS NULL THEN 'SO'
+	 END,'frame_itemsource', target.itemsource, null),					
+('job_type', source.job_type, source.job_type,'frame_jobtype', target.jobtype, null),
+('quantity', source.quantity::text, source.quantity::text,'frame_quantity', target.quantity, null),
+         /*
 ('flags', source.flags, CASE
 	 WHEN source.flags::text ='1000' THEN 'PROBLEM_ORDER'
 	 WHEN source.flags::text ='0100' THEN 'ADDRESS_DIFFERENT'
 	 WHEN source.flags::text ='0010' THEN 'OUTSIDE_LAB'
 	 WHEN source.flags::text ='0001' THEN 'BACKORDER'
 	 WHEN source.flags::text ='0000' THEN ''
- END,'orderflags', target.orderflags, null),
-('job_flags', source.job_flags, '','jobflags', target.jobflags, null),
-('notes', source.notes, source.notes,'notes', target.notes, null)
+ END,'frame_orderflags', target.orderflags, null),  */
+--('job_flags', source.job_flags,'','frame_jobflags', target.jobflags, null),
+--('notes', source.notes, source.notes,'notes', target.notes, null),
 ('auth', source.auth, CASE 
- 	WHEN source.auth IS NULL OR source.auth ='' THEN ''
+ 	WHEN source.auth IS NULL OR source.auth ='' THEN NULL
  	ELSE
  	source.auth
- END,'auth', target.auth, null)					
+ END,'frame_auth', target.auth, null)					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;					
