@@ -45,11 +45,11 @@ CROSS JOIN LATERAL (VALUES
 	end::text,'address_state', target.address_state,null),
 ('home_zip',source.home_zip::text,case
 	--when source.home_zip is null THEN '63011'
-	when length(source.zip::text) < 5 THEN LPAD(source.zip::text::text, 5, '0')
-    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
-    when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
-	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
-        when source.zip::text IS NULL THEN '00000'
+	when length(source.home_zip::text) < 5 THEN LPAD(source.home_zip::text::text, 5, '0')
+    when length(source.home_zip::text) > 5 AND length(source.home_zip::text) < 9 THEN LPAD(source.home_zip::text::text, 9, '0')
+    when length(source.home_zip::text) > 9 THEN substring(source.home_zip::text, '^\d{1,5}')
+	when length(source.home_zip::text) = 5 OR length(source.home_zip::text) = 9  THEN source.home_zip::text
+        when source.home_zip::text IS NULL THEN '00000'
 	end::text,'zip', target.zip,null),
 ('homephone',source.homephone::text,source.homephone::text,'homePhone', target.homePhone,null),
 ('officephone',source.officephone::text,case
@@ -117,3 +117,4 @@ CROSS JOIN LATERAL (VALUES
 
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+

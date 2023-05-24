@@ -23,7 +23,7 @@ CROSS JOIN LATERAL (VALUES
 ('mi',source.mi,source.mi,'mi ', target.mi,null),
 ('birthday', source.birthday::text, case
 	when source.birthday < current_date THEN source.birthday::text 
-	else '01/01/1700'
+	else '1700-01-01'
 	end::text, 'dob', target.dob::text, null),
 --('NS_age',(source.birthday::date)::text,EXTRACT(year FROM age('2023-02-25'::date,birthday::date))::text,'age', target.age,null),
 ('sex', source.sex, case
@@ -33,18 +33,17 @@ CROSS JOIN LATERAL (VALUES
 	else '3' 
 	end::text,
 	'sex', target.sex::text, null),
---('ssn', source.ssn, '*****' || RIGHT(source.ssn,4), 'ssn', target.ssn, null),
 ('ssn', source.ssn, CASE 
- WHEN source.ssn IS NULL THEN NULL
- WHEN source.ssn IS NOT NULL THEN '000000000'
- END,'ssn', target.ssn, null),					
+	 WHEN source.ssn IS NULL THEN NULL
+	 WHEN source.ssn IS NOT NULL THEN '*****' || RIGHT('000000000',4)
+	 END,'ssn', target.ssn, null),					
 ('NS_addresstype','','1','address_type', target.address_type,null),					
 ('address',source.address,source.address,'address_addressLine1', target.address_addressLine1,null),
 ('city',source.city,source.city,'address_city ', target.address_city,null),
 ('state',source.state,source.state,'address_state ', target.address_state,null),
 ('zip',source.zip::text,case
 	when length(source.zip::text) < 5 THEN LPAD(source.zip::text::text, 5, '0')
-    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source,zip::text::text, 9, '0')
+    when length(source.zip::text) > 5 AND length(source.zip::text) < 9 THEN LPAD(source.zip::text::text, 9, '0')
     when length(source.zip::text) > 9 THEN substring(source.zip::text, '^\d{1,5}')
 	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
 	when source.zip::text IS NULL THEN '00000'
@@ -205,7 +204,10 @@ CROSS JOIN LATERAL (VALUES
 		when target.phone_type3 = '2' THEN target.phone_isbad3
 		else NULL 
 		end::text,null),					
-('NS_contactInformation_email_type',NULL,'5','contactInformation_email_type', target.email_type,null),
+('NS_contactInformation_email_type','',CASE
+ 	 WHEN source.guar_email='' or source.guar_email IS NULL THEN NULL
+	 ELSE '5'
+	 end,'contactInformation_email_type', target.email_type,null),
 ('email',source.email,source.email,'email', target.email,null),
 ('NS_contactInformation_emails_isPreferred',NULL,'true','email_isPreferred', target.email_isPreferred,null),
 ('bad_email',source.bad_email::text,source.bad_email::text,'badEmail', target.badEmail,null),
@@ -324,10 +326,10 @@ CROSS JOIN LATERAL (VALUES
 	end::text,'guarantor_lastName', target.guarantor_lastName, null),
 ('guar_birthday', source.guar_birthday::text, case
 	when source.parent is null AND source.birthday < current_date THEN source.birthday::text
-	when source.parent is null AND source.birthday is null OR source.birthday > current_date THEN '1990-01-01'
+	when source.parent is null AND source.birthday is null OR source.birthday > current_date THEN '1700-01-01'
 	when source.parent is not null AND source.guar_birthday < current_date THEN source.guar_birthday::text
  	when source.parent is not null AND source.guar_birthday is null THEN source.birthday::text
-	when source.parent is not null AND source.guar_birthday is null OR source.guar_birthday > current_date THEN '1990-01-01'
+	when source.parent is not null AND source.guar_birthday is null OR source.guar_birthday > current_date THEN '1700-01-01'
 	end::text,'guarantor_dob', target.guarantor_dob::text, null),
 ('guar_married', source.guar_married, case
     when  source.parent is null THEN null
@@ -367,13 +369,9 @@ CROSS JOIN LATERAL (VALUES
 	when  source.guar_sex = 'UNK' THEN 3
 	when  source.guar_sex is null THEN 3
 	end::text,'guarantor_sex', target.guarantor_sex::text, null),
-/*('guar_ssn', source.guar_ssn, case 
- When source.parent is not null THEN ( '*****' || RIGHT(source.guar_ssn,4))
- When source.parent is null THEN null
- end, 'guarantor_ssn', target.guarantor_ssn, null),*/
 ('guar_ssn', source.guar_ssn, CASE 
  WHEN source.guar_ssn IS NULL THEN NULL
- WHEN source.guar_ssn IS NOT NULL THEN '000000000'
+ WHEN source.guar_ssn IS NOT NULL THEN  '*****' || RIGHT('000000000',4)
  END,'guarantor_ssn', target.guarantor_ssn, null),						
 ('guar_designation', source.guar_designation, case
     When source.parent is null THEN null
@@ -487,7 +485,10 @@ CROSS JOIN LATERAL (VALUES
 		when target.guarantor_phone_type3::text = '3' THEN target.guarantor_phone_number3
 		else NULL 
 		end::text, null),
-('NS_guar_emailtype', '','5','guarantor_email_type', target.guarantor_email_type, null)
+('NS_guar_emailtype', '',CASE
+	 WHEN source.guar_email='' or source.guar_email IS NULL THEN NULL
+	 ELSE '5'
+	 end,'guarantor_email_type', target.guarantor_email_type, null)
 
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
