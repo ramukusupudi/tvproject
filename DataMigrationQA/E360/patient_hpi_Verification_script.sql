@@ -15,12 +15,13 @@ CROSS JOIN LATERAL (VALUES
 ('chief_hpi_complaint',CONCAT(source.chief_complaint,source.hpi_complaint) ,case 
  when source.chief_complaint is null and source.hpi_complaint is null THEN ''
  when source.chief_complaint ='/null/' and source.hpi_complaint is null THEN ''
- when source.chief_complaint ='/null/' and source.hpi_complaint is not null THEN source.expected_hpi_value::text
+ when source.chief_complaint ='/null/' and source.hpi_complaint is not null THEN REGEXP_REPLACE(source.expected_hpi_value::text,E'[\\n]+', '', 'g')
  when source.chief_complaint is null and source.hpi_complaint is not null THEN source.expected_hpi_value::text
- when source.chief_complaint is not null and source.hpi_complaint::text is null THEN CONCAT('Chief Complaint: ',source.chief_complaint::text) 
- when source.chief_complaint is not null and source.hpi_complaint is not null THEN CONCAT('Chief Complaint: ',source.chief_complaint::text,source.expected_hpi_value::text) end::text,'notes',REPLACE(target.hpi_notes,'\n','\\n'),null),
-('provider',source.provider,case 
-  when source.provider is null or source.provider::text ='/null/' THEN '' else target.prov_id
+ when source.chief_complaint is not null and source.hpi_complaint is null THEN BTRIM (CONCAT('Chief Complaint: ',source.chief_complaint))
+ when source.chief_complaint is not null and source.hpi_complaint is not null THEN  REGEXP_REPLACE((CONCAT('Chief Complaint: ',source.chief_complaint,source.expected_hpi_value)),'^[\\r\\n\\t ]*|[\\r\\n\\t ]*$', '', 'g') 
+ end::text,'notes',REGEXP_REPLACE(REPLACE(target.hpi_notes,'\n','\\n'),E'[\\n]+', '', 'g'),null),
+('provider',source.provider_src,case 
+  when source.provider_src is null or source.provider_src::text ='/null/' THEN '' else target.prov_id
   end::text,'provider_id',target.provider_id,null),
  ('employee',source.employee, case 
   when source.employee is null or source.employee::text ='/null/' THEN '' else target.emp_id 
