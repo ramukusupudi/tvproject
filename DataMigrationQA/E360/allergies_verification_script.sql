@@ -1,5 +1,5 @@
 DELETE FROM source_target_match WHERE  source_datasetId = 'systemic_allergy_history';
---select * FROM source_target_match WHERE  source_datasetId = 'systemic_allergy_history' and matched ='FALSE' and target_value is not null
+
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'systemic_allergy_history' as source_datasetId,
@@ -41,3 +41,5 @@ CROSS JOIN LATERAL (VALUES
 ('no_drug_allergy',source.no_drug_allergy::text,source.no_drug_allergy::text,'noDrugAllergy',target.noDrugAllergy::text,null)					
 )as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
+--select * FROM source_target_match WHERE  source_datasetId = 'systemic_allergy_history' and matched ='FALSE' and target_value is not null
