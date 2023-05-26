@@ -82,45 +82,45 @@ end,
  	when source.homephone::text is null THEN null
  	when source.homephone::text is not null THEN '1'
  	end,'subscriber_homephonetype', case
-	when source.homephone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-	when source.homephone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-	when source.homephone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+	when target.subscriber_numbertype0 = '1' THEN target.subscriber_numbertype0
+	when target.subscriber_numbertype1 = '1' THEN target.subscriber_numbertype1
+	when target.subscriber_numbertype2 = '1' THEN target.subscriber_numbertype2
 	else null
 	end, null),	
 ('celltype','',CASE 
  	when source.cell::text is null THEN null
  	when source.cell::text is not null THEN '3'
  	end,'subscriber_celltype', case
-		when source.cell::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-		when source.cell::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-		when source.cell::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+		when target.subscriber_numbertype0 = '3' THEN target.subscriber_numbertype0
+		when target.subscriber_numbertype1 = '3' THEN target.subscriber_numbertype1
+		when target.subscriber_numbertype2 = '3' THEN target.subscriber_numbertype2
 		else null
 		end, null),	
 ('workphonetype','',CASE 
  	when source.workphone::text is null THEN null
  	when source.workphone::text is not null THEN '2'
  	end,'subscriber_workphonetype', case
-		when source.workphone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-		when source.workphone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-		when source.workphone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+		when target.subscriber_numbertype0 = '2' THEN target.subscriber_numbertype0
+		when target.subscriber_numbertype1 = '2' THEN target.subscriber_numbertype1
+		when target.subscriber_numbertype2 = '2' THEN target.subscriber_numbertype2
 		else null
 		end, null),					
 ('homephone',source.homephone::text,source.homephone::text,'subscriber_number0', case
-	when source.homephone::text = target.subscriber_number0 THEN target.subscriber_number0
-	when source.homephone::text = target.subscriber_number1 THEN target.subscriber_number1
-	when source.homephone::text = target.subscriber_number2 THEN target.subscriber_number2
+	when target.subscriber_numbertype0 = '1' THEN target.subscriber_number0
+	when target.subscriber_numbertype1 = '1' THEN target.subscriber_number1
+	when target.subscriber_numbertype2 = '1' THEN target.subscriber_number2
 	else null
 	end, null),
 ('workphone',source.workphone::text,source.workphone::text,'subscriber_number1', case
-	when source.workphone::text = target.subscriber_number0 THEN target.subscriber_number0
-	when source.workphone::text = target.subscriber_number1 THEN target.subscriber_number1
-	when source.workphone::text = target.subscriber_number2 THEN target.subscriber_number2
+	when target.subscriber_numbertype0 = '2' THEN target.subscriber_number0
+	when target.subscriber_numbertype1 = '2' THEN target.subscriber_number1
+	when target.subscriber_numbertype2 = '2' THEN target.subscriber_number2
 	else null
 	end, null),
 ('cell',source.cell::text,source.cell::text,'subscriber_number2', case
-	when source.cell::text = target.subscriber_number0 THEN target.subscriber_number0
-	when source.cell::text = target.subscriber_number1 THEN target.subscriber_number1
-	when source.cell::text = target.subscriber_number2 THEN target.subscriber_number2
+	when target.subscriber_numbertype0 = '3' THEN target.subscriber_number0
+	when target.subscriber_numbertype1 = '3' THEN target.subscriber_number1
+	when target.subscriber_numbertype2 = '3' THEN target.subscriber_number2
 	else null
 	end, null),
 ('cov_ic_uid','',CASE 
