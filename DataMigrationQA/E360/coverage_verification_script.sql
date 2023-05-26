@@ -12,7 +12,7 @@ FROM v_source_coverage as source
 FULL JOIN v_migrated_coverage as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
   
---('patient', source.patient, source.patient, 'beneficiary_id', target.beneficiary_id, null),
+--('patient', source.patient, source.patient, 'beneficiary_id', target.beneficiary_id, null),,,
 ('patins_type', source.patins_type::text, case
 	when source.patins_type = '0' THEN 'UNKNOWN'
 	when source.patins_type = '1' THEN 'VISION'
@@ -37,7 +37,7 @@ when source.ordering = '0' THEN 'PRIMARY'
 when source.ordering = '1' THEN 'SECONDARY'
 when source.ordering = '2' THEN 'TERTIARY'
 end,
-'priority', target.priority, null),*/
+'priority', target.priority, null),,*/
 ('subscriber_relationship',source.subscriber_relationship::text,case
 	when source.subscriber_relationship::text = 'SELF' THEN '99'
 	when source.subscriber_relationship::text = 'SPOUSE' THEN '1'
@@ -82,45 +82,45 @@ end,
  	when source.homephone::text is null THEN null
  	when source.homephone::text is not null THEN '1'
  	end,'subscriber_homephonetype', case
-	when source.homephone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-	when source.homephone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-	when source.homephone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+	when target.subscriber_numbertype0 = '1' THEN target.subscriber_numbertype0
+	when target.subscriber_numbertype1 = '1' THEN target.subscriber_numbertype1
+	when target.subscriber_numbertype2 = '1' THEN target.subscriber_numbertype2
 	else null
 	end, null),	
 ('celltype','',CASE 
  	when source.cell::text is null THEN null
  	when source.cell::text is not null THEN '3'
  	end,'subscriber_celltype', case
-		when source.cell::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-		when source.cell::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-		when source.cell::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+		when target.subscriber_numbertype0 = '3' THEN target.subscriber_numbertype0
+		when target.subscriber_numbertype1 = '3' THEN target.subscriber_numbertype1
+		when target.subscriber_numbertype2 = '3' THEN target.subscriber_numbertype2
 		else null
 		end, null),	
 ('workphonetype','',CASE 
  	when source.workphone::text is null THEN null
  	when source.workphone::text is not null THEN '2'
  	end,'subscriber_workphonetype', case
-		when source.workphone::text = target.subscriber_number0 THEN target.subscriber_numbertype0
-		when source.workphone::text = target.subscriber_number1 THEN target.subscriber_numbertype1
-		when source.workphone::text = target.subscriber_number2 THEN target.subscriber_numbertype2
+		when target.subscriber_numbertype0 = '2' THEN target.subscriber_numbertype0
+		when target.subscriber_numbertype1 = '2' THEN target.subscriber_numbertype1
+		when target.subscriber_numbertype2 = '2' THEN target.subscriber_numbertype2
 		else null
 		end, null),					
 ('homephone',source.homephone::text,source.homephone::text,'subscriber_number0', case
-	when source.homephone::text = target.subscriber_number0 THEN target.subscriber_number0
-	when source.homephone::text = target.subscriber_number1 THEN target.subscriber_number1
-	when source.homephone::text = target.subscriber_number2 THEN target.subscriber_number2
+	when target.subscriber_numbertype0 = '1' THEN target.subscriber_number0
+	when target.subscriber_numbertype1 = '1' THEN target.subscriber_number1
+	when target.subscriber_numbertype2 = '1' THEN target.subscriber_number2
 	else null
 	end, null),
 ('workphone',source.workphone::text,source.workphone::text,'subscriber_number1', case
-	when source.workphone::text = target.subscriber_number0 THEN target.subscriber_number0
-	when source.workphone::text = target.subscriber_number1 THEN target.subscriber_number1
-	when source.workphone::text = target.subscriber_number2 THEN target.subscriber_number2
+	when target.subscriber_numbertype0 = '2' THEN target.subscriber_number0
+	when target.subscriber_numbertype1 = '2' THEN target.subscriber_number1
+	when target.subscriber_numbertype2 = '2' THEN target.subscriber_number2
 	else null
 	end, null),
 ('cell',source.cell::text,source.cell::text,'subscriber_number2', case
-	when source.cell::text = target.subscriber_number0 THEN target.subscriber_number0
-	when source.cell::text = target.subscriber_number1 THEN target.subscriber_number1
-	when source.cell::text = target.subscriber_number2 THEN target.subscriber_number2
+	when target.subscriber_numbertype0 = '3' THEN target.subscriber_number0
+	when target.subscriber_numbertype1 = '3' THEN target.subscriber_number1
+	when target.subscriber_numbertype2 = '3' THEN target.subscriber_number2
 	else null
 	end, null),
 ('cov_ic_uid','',CASE 
