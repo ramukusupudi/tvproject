@@ -37,7 +37,7 @@ when source.ordering = '0' THEN 'PRIMARY'
 when source.ordering = '1' THEN 'SECONDARY'
 when source.ordering = '2' THEN 'TERTIARY'
 end,
-'priority', target.priority, null),*/
+'priority', target.priority, null),,*/
 ('subscriber_relationship',source.subscriber_relationship::text,case
 	when source.subscriber_relationship::text = 'SELF' THEN '99'
 	when source.subscriber_relationship::text = 'SPOUSE' THEN '1'
