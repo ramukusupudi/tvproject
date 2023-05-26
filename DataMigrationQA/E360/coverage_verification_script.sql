@@ -12,7 +12,7 @@ FROM v_source_coverage as source
 FULL JOIN v_migrated_coverage as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
   
---('patient', source.patient, source.patient, 'beneficiary_id', target.beneficiary_id, null),,
+--('patient', source.patient, source.patient, 'beneficiary_id', target.beneficiary_id, null),,,
 ('patins_type', source.patins_type::text, case
 	when source.patins_type = '0' THEN 'UNKNOWN'
 	when source.patins_type = '1' THEN 'VISION'
