@@ -1,5 +1,5 @@
 DELETE FROM source_target_match WHERE  source_datasetId = 'external';
-
+--select * FROM source_target_match WHERE  source_datasetId = 'external' and matched ='FALSE' and target_value is not null
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'external' as source_datasetId,
@@ -15,7 +15,7 @@ CROSS JOIN LATERAL (VALUES
 ('slx_ll_od-slx_ll_os',CONCAT(source.slx_ll_od,source.slx_ll_os),case 
  when source.slx_ll_od is null and source.slx_ll_os is null THEN ''
  when source.slx_ll_od ='/null/' and source.slx_ll_os ='/null/' THEN ''
- when source.slx_ll_od ='/null/' and source.slx_ll_os is not null THEN CONCAT('OD:',source.slx_ll_od)
+ when source.slx_ll_od ='/null/' and source.slx_ll_os is not null THEN CONCAT('OS:',source.slx_ll_os)
  when source.slx_ll_od is not null and source.slx_ll_os ='/null/' THEN CONCAT('OD:',source.slx_ll_od)
  when source.slx_ll_od is not null  and source.slx_ll_os is not null THEN CONCAT('OD:',source.slx_ll_od,'; OS:',source.slx_ll_os) end,'lids_lashes_notes',target.lids_lashes_notes,null),
 ('slx_tears_od-slx_tears_os',CONCAT(source.slx_tears_od,source.slx_tears_os),case 
@@ -26,6 +26,3 @@ CROSS JOIN LATERAL (VALUES
  when source.slx_tears_od is not null and source.slx_tears_os is not null THEN CONCAT('OD:',source.slx_tears_od,'; OS:',source.slx_tears_os) end,'lacrimal_notes',target.lacrimal_notes,null)										
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
-
-
-
