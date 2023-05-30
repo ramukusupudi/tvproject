@@ -16,12 +16,10 @@ CROSS JOIN LATERAL (VALUES
 ('rxnorm',source.rxnorm,source.rxnorm,'code',target.code,null),	
 ('allergienames',concat(source.allergienames,'*',source.allergy_name), case
  when source.allergienames='' THEN source.allergy_name
- when source.allergienames is null THEN concat(source.allergienames,source.allergy_name) 
  when source.allergienames is not null THEN source.allergienames 
  when source.allergienames is null and source.allergy_name is null THEN null end::text ,'name',target.name,null),	
 ('allergienames',concat(source.allergienames,'_',source.allergy_name), case
  when source.allergienames ='' THEN source.allergy_name
- when source.allergienames is null THEN concat(source.allergienames,source.allergy_name) 
  when source.allergienames is not null THEN source.allergienames 
  when source.allergienames is null and source.allergy_name is null THEN null end::text ,'drfirstname',target.drfirstname,null),						
 ('ndcid',source.ndcid,source.ndcid,'drfirstndcid',target.drfirstndcid,null),
