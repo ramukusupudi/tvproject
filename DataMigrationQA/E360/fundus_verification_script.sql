@@ -10,8 +10,8 @@ SELECT
 FROM v_source_exam_fundus as source
 FULL JOIN v_migrated_fundus as target ON CONCAT(source.uid,'_fundus') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
---('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
---('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
+('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
+('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
 ('slx_antvit_od',source.slx_antvit_od, case 
                                         when source.slx_antvit_od ='/null/' THEN ''
  										when source.slx_antvit_od ='' THEN ''
