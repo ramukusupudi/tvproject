@@ -10,8 +10,8 @@ SELECT
 FROM v_source_exam_eye_movements as source
 FULL JOIN v_migrated_motility as target ON CONCAT(source.uid,'_motility') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
-('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
+--('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
+--('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
 ('eoms',source.eoms, case
  						  when source.eoms ='/null/' THEN ''
  						  when source.eoms is null THEN ''
