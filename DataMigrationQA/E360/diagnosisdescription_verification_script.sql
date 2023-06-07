@@ -11,6 +11,8 @@ SELECT
 FROM v_source_diagnosisdescription as source
 FULL JOIN v_migrated_diagnosisdescription as target ON concat(source.uid,'_','diagnosisDescription')= target.source_instanceId
 CROSS JOIN LATERAL (VALUES
+  ('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),				
+  ('date',source.date::text,TO_CHAR(source.date::DATE,'mm/dd/yyyy'),'appointmentdate',target.appointmentdate,null),
   ('plan_description1',source.plan_description1,source.plan_description1,'diagnosis_plan1',target.diagnosis_plan1,null),
   ('plan_description2',source.plan_description2,source.plan_description2,'diagnosis_plan2',target.diagnosis_plan2,null),
   ('impression_icd101',source.impression_icd101,source.impression_icd101,'diagnosis_icdcode1',target.diagnosis_icdcode1,null),
@@ -19,3 +21,4 @@ CROSS JOIN LATERAL (VALUES
   ('impression_desc2',source.impression_desc2,source.impression_desc2,'diagnosis_desc2',target.diagnosis_desc2,null)					
  ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+--select * FROM source_target_match WHERE  source_datasetId = 'diagnosisdescription' and matched ='FALSE' and target_value is not null
