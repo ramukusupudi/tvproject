@@ -8,13 +8,13 @@ SELECT
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM v_source_exam_autorefraction as source 
-FULL JOIN v_migrated_autorefraction as target ON CONCAT(source.uid,'_ar') = target.source_instanceId
+RIGHT JOIN v_migrated_autorefraction as target ON CONCAT(source.uid,'_ar') = target.source_instanceId
 
 CROSS JOIN LATERAL (VALUES
 					
 ('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
-('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
 ('keratometry_dk_od_org',source.keratometry_dk_od,CASE 
  	WHEN source.keratometry_dk_od = '/null/' OR source.keratometry_dk_od is null THEN ''
  	ELSE source.keratometry_dk_od

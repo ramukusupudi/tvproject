@@ -138,7 +138,11 @@ end,
 ('cov_front_filename','',CASE 
  	when target.cov_digitalassetsmasterfrontfilename::text is null THEN null
  	else target.cov_digitalassetsmasterfrontfilename
- 	end,'ins_front_filename', target.ic_front_fileName, null)		
+ 	end,'ins_front_filename', target.ic_front_fileName, null),
+('payor_name',source.payor,CASE 
+ WHEN source.payor IS NOT NULL THEN source.payor
+ ELSE 'Routine - VSP - In-Network'
+ END,'payer_name', target.payer_name, null)					
 /*('cov_ins_back_id','',CASE 
  	when target.digitalassetsmasterbackuid::text is null THEN null
  	else target.digitalassetsmasterbackuid

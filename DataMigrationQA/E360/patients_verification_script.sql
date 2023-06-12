@@ -209,7 +209,10 @@ CROSS JOIN LATERAL (VALUES
 	 ELSE '5'
 	 end,'contactInformation_email_type', target.email_type,null),
 ('email',source.email,source.email,'email', target.email,null),
-('NS_contactInformation_emails_isPreferred',NULL,'true','email_isPreferred', target.email_isPreferred,null),
+('NS_contactInformation_emails_isPreferred',NULL,CASE
+ WHEN source.email IS NULL THEN NULL
+ ELSE 'true'
+ END,'email_isPreferred', target.email_isPreferred,null),
 ('bad_email',source.bad_email::text,source.bad_email::text,'badEmail', target.badEmail,null),
 ('no_email',source.no_email::text,Case 
 	when target.email is null or target.email ='' THEN 'true'
