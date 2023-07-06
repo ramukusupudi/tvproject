@@ -1,5 +1,6 @@
 Delete from source_target_match where source_datasetId = 'DigitalAssets_ic_front';
 
+
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'DigitalAssets_ic_front' as source_datasetId,

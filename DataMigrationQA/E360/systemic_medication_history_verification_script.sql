@@ -1,5 +1,6 @@
 DELETE FROM source_target_match WHERE  source_datasetId = 'systemic_medication_history';
 
+
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, 
 target_id,
 target_field, target_value, matched, notes)
@@ -134,6 +135,3 @@ CROSS JOIN LATERAL (VALUES
 					
 )as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;	
-
---select sysmedications_json from public.v_source_exam_systemic_medication_history
---Limit 1

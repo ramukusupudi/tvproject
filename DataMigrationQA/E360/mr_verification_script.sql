@@ -69,9 +69,8 @@ CROSS JOIN LATERAL (VALUES
 ('manifest_prism_os',source.manifest_prism_os,CASE 
  	WHEN source.manifest_prism_os = '/null/' OR source.manifest_prism_os is null THEN ''
     else source.manifest_prism_os
- 	end,'prism_os', target.prism_os,null)					
-															
-					
+ 	end,'prism_os', target.prism_os,null)			
+													
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
 
