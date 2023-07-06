@@ -10,12 +10,11 @@ SELECT
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
 FROM public.v_source_exam_binocular as source 
 FULL JOIN v_migrated_binocular as target ON CONCAT(source.uid,'_binocular') = target.source_instanceId
---v_source_binocular
 CROSS JOIN LATERAL (VALUES
 					
 ('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
-('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),					
+('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),					
 ('npc',source.npc,CASE 
  WHEN source.npc ='/null/' OR source.npc is  null THEN ''
  else source.npc

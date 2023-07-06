@@ -1,15 +1,15 @@
 --CLRx Script
-DELETE FROM source_target_match WHERE  source_datasetId = 'CLRx';
+DELETE FROM source_target_match WHERE  source_datasetId = 'CLRx-Habitual';
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'CLRx' as source_datasetId,
-  CONCAT(source.uid,'_',source.cpuid,'_clrx') as source_id, 
+  'CLRx-Habitual' as source_datasetId,
+   CONCAT(source.uid,'_clrx_habitual1') as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
-FROM v_source_exam_clrx as source
-FULL JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_',source.cpuid,'_clrx')  = target.source_instanceId
+FROM v_source_exam_clrx as source 
+LEFT JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_clrx_habitual1')  = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 ('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
 ('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
@@ -20,7 +20,7 @@ CROSS JOIN LATERAL (VALUES
  END,'sequence',target.sequence,null),					
 --('clod_trial',source.clod_trial::text,source.trial::text,'os_t',target.os_t,null),
 ('r_bc2',source.r_bc2::text,CASE 
- 	WHEN source.r_bc2::text is null THEN ''
+    WHEN source.r_bc2::text is null OR source.r_bc2::text = '/null/' THEN ''
  	else source.r_bc2::text
  	end,'od_bc2',target.od_bc2,null),					
 ('r_axis',source.r_axis::text,CASE 
@@ -48,8 +48,9 @@ CROSS JOIN LATERAL (VALUES
  	else source.mfg::text
  	end,'od_lens_manufacturer',target.od_manufacturer,null),
 ('od_cl_typename',source.cl_typename,CASE
- 	WHEN source.is_habitual='false' AND (source.eye ='1' OR source.eye = '3') THEN source.cl_typename::text
- 	else ''
+ 	--WHEN source.is_habitual='false' AND (source.eye ='1' OR source.eye = '3') THEN source.cl_typename::text
+ 	WHEN source.is_habitual='true' AND source.cl_typename::text IS NOT NULL THEN source.cl_typename::text 
+    WHEN source.is_habitual='true' AND source.cl_typename::text IS NULL THEN '' 
  	end,'od_type',target.od_type,null),	
 ('r_power2',source.r_power2,CASE 
  	WHEN source.r_power2::text is null OR source.r_power2::text = '/null/' THEN ''
@@ -60,9 +61,9 @@ CROSS JOIN LATERAL (VALUES
  	else source.r_color::text
  	end,'od_color',target.od_color,null),
 ('od_notes',source.eye::text,CASE 
- 	WHEN source.is_habitual='false' AND (source.eye::text ='1' OR source.eye::text = '3') AND source.notes::text IS NOT NULL THEN source.notes::text
+ 	--WHEN source.is_habitual='false' AND (source.eye::text ='1' OR source.eye::text = '3') AND source.notes::text IS NOT NULL THEN source.notes::text
  	WHEN source.notes::text is null OR source.notes::text = '/null/' THEN ''
- 	else ''
+ 	WHEN source.is_habitual='true' AND (source.notes::text is not null OR source.notes::text != '/null/') THEN source.notes::text
  	end,'clrx_od_notes',target.clrx_od_notes,null),					
 ('r_seg',source.r_seg,CASE 
  	WHEN source.r_seg::text is null OR source.r_seg::text = '/null/' THEN ''
@@ -115,7 +116,7 @@ CROSS JOIN LATERAL (VALUES
 ('clos_trial',source.clos_trial::text,CASE 
  	--WHEN source.clod_trial::text is null OR source.clod_trial::text = '/null/' THEN ''
     WHEN source.is_habitual ='false'  AND (source.eye ='2' OR source.eye ='3') THEN source.clos_trial::text
- 	WHEN source.is_habitual ='true'  THEN 'false'
+ 	WHEN source.is_habitual ='true'  THEN source.clos_trial::text
  	end,'os_t',target.os_t,null),					
 ('l_bc',source.l_bc,CASE 
  	WHEN source.l_bc::text is null OR source.l_bc::text = '/null/' THEN ''
@@ -154,18 +155,17 @@ CROSS JOIN LATERAL (VALUES
  	else source.clos_mfg::text
  	end,'os_manufacturer',target.os_manufacturer,null),
 ('cl_os_typename',source.cl_os_typename,CASE
- 	WHEN source.eye ='2' OR source.eye = '3' THEN source.cl_typename::text
- 	--WHEN source.cl_typename::text is null OR source.cl_typename::text = '/null/' THEN ''
- 	else ''
+ 	WHEN source.is_habitual='true' AND (source.cl_os_typename::text is null OR source.cl_os_typename::text = '/null/') THEN ''
+ 	WHEN source.is_habitual='true' AND (source.cl_os_typename::text is not null OR source.cl_os_typename::text != '/null/') THEN source.cl_os_typename::text
  	end,'os_type',target.os_type,null),					
 ('l_color',source.l_color,CASE 
  	WHEN source.l_color::text is null OR source.l_color::text = '/null/' THEN ''
  	else source.l_color::text
  	end,'os_color',target.os_color,null),
-('clhabit_notes',source.clhabit_notes,CASE 
- 	WHEN (source.eye ='2' OR source.eye = '3') AND source.clhabit_notes::text IS NOT NULL THEN source.clhabit_notes::text
- 	WHEN source.clhabit_notes::text is null OR source.clhabit_notes::text = '/null/' THEN ''
- 	else ''
+('os_clhabit_notes',source.clhabit_notes,CASE 
+ 	--WHEN (source.eye ='2' OR source.eye = '3') AND source.clhabit_notes::text IS NOT NULL THEN source.clhabit_notes::text
+ 	WHEN source.is_habitual ='true' AND (source.clhabit_notes::text is null OR source.clhabit_notes::text = '/null/') THEN ''
+ 	WHEN source.is_habitual ='true' AND (source.clhabit_notes::text is not null OR source.clhabit_notes::text != '/null/') THEN source.clhabit_notes::text
  	end,'clrx_os_notes',target.clrx_os_notes,null),
 ('l_seg',source.l_seg,CASE 
  	WHEN source.l_seg::text is null OR source.l_seg::text = '/null/' THEN ''
@@ -190,7 +190,7 @@ CROSS JOIN LATERAL (VALUES
 ('l_power',source.l_power,CASE 
  	WHEN source.l_power::text is null OR source.l_power::text = '/null/' THEN ''
  	else source.l_power::text
- 	end,'os_sphere',target.os_sphere,null),
+ 	end,'clrx_os_sphere',target.clrx_os_sphere,null),
 ('l_power2',source.l_power2,CASE 
  	WHEN source.l_power2::text is null OR source.l_power::text = '/null/' THEN ''
  	else source.l_power2::text
@@ -227,33 +227,35 @@ CROSS JOIN LATERAL (VALUES
 ('notes',source.notes,CASE 
  	--WHEN source.notes::text is null OR source.notes::text = '/null/' THEN ''
  	WHEN source.is_habitual='false' THEN source.notes::text
- 	else NULL
+ 	else ''
  	end,'clrx_notes',target.clrx_notes,null),
 ('final_rx',source.final_rx::text,CASE 
- 	WHEN source.final_rx::text is null OR source.final_rx::text = '/null/' THEN ''
+ 	WHEN source.final_rx::text is null OR source.final_rx::text = '/null/' THEN NULL
  	else source.final_rx::text
  	end::text,'finalRx',target.finalRx::text,null),	
 ('clod_trial',source.clod_trial::text,CASE 
  	--WHEN source.clod_trial::text is null OR source.clod_trial::text = '/null/' THEN ''
-    WHEN source.is_habitual ='false'  THEN source.clod_trial::text
- 	WHEN source.is_habitual ='true'  THEN 'false'
+   -- WHEN source.is_habitual ='false'  THEN source.clod_trial::text
+ 	WHEN source.is_habitual ='true'  THEN NULL
  	end,'trialRx',target.trialRx,null),
-('cpdate',to_char(source.cpdate, 'MM/DD/YYYY'),CASE 
+('clrx_cpdate',to_char(source.cpdate, 'MM/DD/YYYY'),CASE 
  	--WHEN source.cpdate is null OR source.cpdate::text = '/null/' THEN null
  	WHEN source.is_habitual='false' THEN to_char(source.cpdate, 'MM/DD/YYYY')
- 	else NULL
+ 	WHEN source.is_habitual='true' AND source.cpdate IS NOT NULL THEN to_char(source.cpdate, 'MM/DD/YYYY')
+    WHEN source.is_habitual='true' AND source.cpdate IS NULL THEN ''
  	end,'clrx_startDate',target.clrx_startDate,null),	
 ('clhabit_notes',source.clhabit_notes,CASE 
- 	WHEN source.is_habitual='true' THEN source.clhabit_notes::text
- 	else NULL
+ 	--WHEN source.is_habitual='true' THEN source.clhabit_notes::text
+    WHEN source.is_habitual='true' AND (source.clhabit_notes::text is null OR source.clhabit_notes::text = '/null/') THEN ''
+ 	WHEN source.is_habitual='true' AND (source.clhabit_notes::text is not null OR source.clhabit_notes::text != '/null/') THEN source.clhabit_notes::text
  	end,'data_notes',target.data_notes,null),					
 ('candm_detail',source.candm_detail,CASE 
  	WHEN source.candm_detail::text is null OR source.candm_detail::text = '/null/' THEN ''
  	else source.candm_detail::text
  	end,'drawing_notes',REPLACE(target.drawing_notes,'\n','\\n'),null),
 ('cpdate',to_char(source.cpdate, 'MM/DD/YYYY'),CASE 
- 	WHEN source.is_habitual='false' THEN to_char(source.cpdate, 'MM/DD/YYYY')
- 	else NULL
+ 	--WHEN source.is_habitual='true' AND source.cpdate IS NOT NULL THEN to_char(source.cpdate, 'MM/DD/YYYY')
+    WHEN source.is_habitual='true' THEN ''
  	end,'data_startDate',target.data_startDate,null),
 ('candm',source.candm,CASE
  	WHEN source.candm::text is null then null
@@ -342,10 +344,10 @@ CROSS JOIN LATERAL (VALUES
  	WHEN source.r_dn is null OR source.r_dn::text = '/null/' THEN ''
  	else source.r_dn::text
  	end,'od_dn',target.od_dn,null),
-('clod_trial',source.clod_trial::text,CASE 
+('od_clod_trial',source.clod_trial::text,CASE 
  	--WHEN source.clod_trial::text is null OR source.clod_trial::text = '/null/' THEN ''
     WHEN source.is_habitual ='false'  AND (source.eye ='1' OR source.eye ='3') THEN source.clod_trial::text
- 	WHEN source.is_habitual ='true'  THEN 'false'
+ 	WHEN source.is_habitual ='true'  THEN source.clod_trial::text
  	end,'od_t',target.od_t,null),
 ('r_bc',source.r_bc,CASE 
  	WHEN source.r_bc is null OR source.r_bc::text = '/null/' THEN ''
@@ -357,5 +359,7 @@ CROSS JOIN LATERAL (VALUES
  	end,'clrx_od_add',target.clrx_od_add,null),
 ('is_habitual',source.is_habitual,source.is_habitual,'data_ishabitual',target.data_ishabitual,null)					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
-;
+where source.is_habitual='true';
+
+
 

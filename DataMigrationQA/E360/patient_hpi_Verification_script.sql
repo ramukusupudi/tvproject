@@ -10,8 +10,8 @@ SELECT
 FROM v_source_exam_hpi_verfication as source
 FULL JOIN v_migrated_patient_hpi as target ON CONCAT(source.uid,'_patient_hpi') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
---('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
---('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
+('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),				
+('date',source.date::text,TO_CHAR(source.date::DATE,'mm/dd/yyyy'),'appointmentdate',target.appointmentdate,null),
 ('chief_hpi_complaint',CONCAT(source.chief_complaint,source.hpi_complaint) ,case 
  when source.chief_complaint is null and source.hpi_complaint is null THEN ''
  when source.chief_complaint ='/null/' and source.hpi_complaint is null THEN ''

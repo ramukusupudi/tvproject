@@ -1,17 +1,18 @@
 --CLRx Script
-DELETE FROM source_target_match WHERE  source_datasetId = 'CLRx';
+DELETE FROM source_target_match WHERE  source_datasetId = 'CLRx-Regular';
 
 INSERT INTO source_target_match(source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
-  'CLRx' as source_datasetId,
+  'CLRx-Regular' as source_datasetId,
   CONCAT(source.uid,'_',source.cpuid,'_clrx') as source_id, 
+  --CONCAT(source.uid,'_clrx_habitual1') as source_id, 
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
-FROM v_source_exam_clrx as source
-FULL JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_',source.cpuid,'_clrx')  = target.source_instanceId
+FROM v_source_exam_clrx as source 
+LEFT JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_',source.cpuid,'_clrx')  = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
+--('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
 ('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
 ('sequence',source.date::text,CASE
@@ -162,7 +163,7 @@ CROSS JOIN LATERAL (VALUES
  	WHEN source.l_color::text is null OR source.l_color::text = '/null/' THEN ''
  	else source.l_color::text
  	end,'os_color',target.os_color,null),
-('clhabit_notes',source.clhabit_notes,CASE 
+('os_clhabit_notes',source.clhabit_notes,CASE 
  	WHEN (source.eye ='2' OR source.eye = '3') AND source.clhabit_notes::text IS NOT NULL THEN source.clhabit_notes::text
  	WHEN source.clhabit_notes::text is null OR source.clhabit_notes::text = '/null/' THEN ''
  	else ''
@@ -190,7 +191,7 @@ CROSS JOIN LATERAL (VALUES
 ('l_power',source.l_power,CASE 
  	WHEN source.l_power::text is null OR source.l_power::text = '/null/' THEN ''
  	else source.l_power::text
- 	end,'os_sphere',target.os_sphere,null),
+ 	end,'clrx_os_sphere',target.clrx_os_sphere,null),
 ('l_power2',source.l_power2,CASE 
  	WHEN source.l_power2::text is null OR source.l_power::text = '/null/' THEN ''
  	else source.l_power2::text
@@ -226,11 +227,11 @@ CROSS JOIN LATERAL (VALUES
  	end,'clrx_eyeDom',target.clrx_eyeDom::text,null),					
 ('notes',source.notes,CASE 
  	--WHEN source.notes::text is null OR source.notes::text = '/null/' THEN ''
- 	WHEN source.is_habitual='false' THEN source.notes::text
- 	else NULL
+ 	WHEN source.is_habitual='false' AND source.notes::text IS NOT NULL THEN source.notes::text
+ 	else ''
  	end,'clrx_notes',target.clrx_notes,null),
 ('final_rx',source.final_rx::text,CASE 
- 	WHEN source.final_rx::text is null OR source.final_rx::text = '/null/' THEN ''
+ 	WHEN source.final_rx::text is null OR source.final_rx::text = '/null/' THEN NULL
  	else source.final_rx::text
  	end::text,'finalRx',target.finalRx::text,null),	
 ('clod_trial',source.clod_trial::text,CASE 
@@ -244,8 +245,7 @@ CROSS JOIN LATERAL (VALUES
  	else NULL
  	end,'clrx_startDate',target.clrx_startDate,null),	
 ('clhabit_notes',source.clhabit_notes,CASE 
- 	WHEN source.is_habitual='true' THEN source.clhabit_notes::text
- 	else NULL
+ 	WHEN source.is_habitual='false' THEN ''
  	end,'data_notes',target.data_notes,null),					
 ('candm_detail',source.candm_detail,CASE 
  	WHEN source.candm_detail::text is null OR source.candm_detail::text = '/null/' THEN ''
@@ -357,5 +357,5 @@ CROSS JOIN LATERAL (VALUES
  	end,'clrx_od_add',target.clrx_od_add,null),
 ('is_habitual',source.is_habitual,source.is_habitual,'data_ishabitual',target.data_ishabitual,null)					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
-;
+where source.is_habitual='false';
 

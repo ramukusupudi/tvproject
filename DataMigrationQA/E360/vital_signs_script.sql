@@ -11,18 +11,23 @@ FROM v_source_exam_vital_signs as source
 FULL JOIN v_migrated_vital_signs as target ON CONCAT(source.uid,'_vital_signs')  = target.source_instanceid 
 CROSS JOIN LATERAL (VALUES
   
-('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,patient_tableId',target.patient_targetId,null),
-('date',source.date,source.date,'AppointmentDate',target.AppointmentDate,null),
-('diastolic_bp',source.diastolic_bp,CASE
- WHEN source.diastolic_bp ='/null/' OR source.diastolic_bp is null THEN ''
- ELSE source.diastolic_bp
+('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),
+('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
+('diastolic_bp',source.vital_signs->0->>'PatientStats_diastolic_bp',CASE
+ WHEN source.vital_signs->0->>'PatientStats_diastolic_bp' ='/null/' OR source.vital_signs->0->>'PatientStats_diastolic_bp' is null THEN ''
+ ELSE source.vital_signs->0->>'PatientStats_diastolic_bp'
  END,'bloodpressuredia',REPLACE(target.bloodpressuredia,'\n','\\n'),null),
-('systolic_bp',source.systolic_bp,CASE
- WHEN source.systolic_bp ='/null/' OR source.systolic_bp is null THEN ''
- ELSE source.systolic_bp
- END,'bloodpressuresys',REPLACE(target.bloodpressuresys,'\n','\\n'),null)					
-					
+('systolic_bp',source.vital_signs->0->>'PatientStats_systolic_bp',CASE
+ WHEN source.vital_signs->0->>'PatientStats_systolic_bp' ='/null/' OR source.vital_signs->0->>'PatientStats_systolic_bp' is null THEN ''
+ ELSE source.vital_signs->0->>'PatientStats_systolic_bp'
+ END,'bloodpressuresys',REPLACE(target.bloodpressuresys,'\n','\\n'),null),					
+('PatientStats_date',source.vital_signs->0->>'PatientStats_date'::text,TO_CHAR((source.vital_signs->0->>'PatientStats_date')::date, 'MM/DD/YYYY'),'vital_date',target.vital_date::text,null)					
 						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+/*
+select vital_signs->0->>'PatientStats_systolic_bp' from v_source_exam_vital_signs
+where uid='BB8E7DFAC8B2192D30F6520B0CEC0101'
+--'vital_signs'->>'PatientStats_systolic_bp'
+[{"PatientStats_date": "2020-12-10","PatientStats_systolic_bp": "120","PatientStats_diastolic_bp": "90"}]  */
