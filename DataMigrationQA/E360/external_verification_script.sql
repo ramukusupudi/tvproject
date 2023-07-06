@@ -10,8 +10,8 @@ SELECT
 FROM v_source_exam_external as source
 FULL JOIN v_migrated_external as target ON CONCAT(source.uid,'_external') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
-('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
+--('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
+--('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
 ('slx_ll_od-slx_ll_os',CONCAT(source.slx_ll_od,source.slx_ll_os),case 
  when source.slx_ll_od is null and source.slx_ll_os is null THEN ''
  when source.slx_ll_od ='/null/' and source.slx_ll_os ='/null/' THEN ''

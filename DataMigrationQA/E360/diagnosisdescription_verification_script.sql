@@ -21,3 +21,4 @@ CROSS JOIN LATERAL (VALUES
   ('impression_desc2',source.impression_desc2,source.impression_desc2,'diagnosis_desc2',target.diagnosis_desc2,null)					
  ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+--select * FROM source_target_match WHERE  source_datasetId = 'diagnosisdescription' and matched ='FALSE' and target_value is not null
