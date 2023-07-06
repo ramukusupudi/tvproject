@@ -205,7 +205,7 @@ CROSS JOIN LATERAL (VALUES
 		else NULL 
 		end::text,null),					
 ('NS_contactInformation_email_type','',CASE
- 	 WHEN source.guar_email='' or source.guar_email IS NULL THEN NULL
+ 	 WHEN source.email='' or source.email IS NULL THEN NULL
 	 ELSE '5'
 	 end,'contactInformation_email_type', target.email_type,null),
 ('email',source.email,source.email,'email', target.email,null),
@@ -213,7 +213,10 @@ CROSS JOIN LATERAL (VALUES
  WHEN source.email IS NULL THEN NULL
  ELSE 'true'
  END,'email_isPreferred', target.email_isPreferred,null),
-('bad_email',source.bad_email::text,source.bad_email::text,'badEmail', target.badEmail,null),
+('bad_email',source.bad_email::text,CASE 
+	 WHEN source.email IS NOT NULL THEN  source.bad_email::text
+	 ELSE NULL
+	 END,'badEmail', target.badEmail,null),
 ('no_email',source.no_email::text,Case 
 	when target.email is null or target.email ='' THEN 'true'
 	else source.no_email
@@ -348,18 +351,17 @@ CROSS JOIN LATERAL (VALUES
 	end::text,'guarantor_maritalStatus', target.guarantor_maritalStatus::text, null),
 ('guar_mi',source.guar_mi,source.guar_mi,'guarantor_middleName', target.guarantor_middleName,null),
 ('parent', source.subscriber_relationship, case
-	when source.subscriber_relationship = 'SELF' THEN 1
- 	when source.parent is null THEN 1
-	when source.subscriber_relationship = 'SPOUSE' THEN 2
- 	when source.subscriber_relationship = 'CHILD' THEN 3
- 	when source.subscriber_relationship = 'GRANDCHILD' THEN 13
- 	when source.subscriber_relationship = 'NIECE' THEN 14
- 	when source.subscriber_relationship = 'NEPHEW' THEN 14
+	when source.subscriber_relationship = 'SELF' THEN 99
+	when source.subscriber_relationship = 'SPOUSE' THEN 1
+ 	when source.subscriber_relationship = 'CHILD' THEN 116
+ 	when source.subscriber_relationship = 'GRANDCHILD' THEN 5
+ 	when source.subscriber_relationship = 'NIECE' THEN 7
+ 	when source.subscriber_relationship = 'NEPHEW' THEN 7
 	when source.subscriber_relationship = 'UNKNOWN' THEN 9
- 	when source.subscriber_relationship = 'PARENT' THEN 18
- 	when source.subscriber_relationship = 'GRANDPARENT' THEN 19
- 	when source.subscriber_relationship = 'DOMESTIC_PARTNER' THEN 20
- 	when source.subscriber_relationship is null THEN 9
+ 	when source.subscriber_relationship = 'PARENT' THEN 122
+ 	when source.subscriber_relationship = 'GRANDPARENT' THEN 4
+ 	when source.subscriber_relationship = 'DOMESTIC_PARTNER' THEN 53
+ 	ELSE 21
 	end::text,'guarantor_relationship', target.guarantor_relationship::text, null),
 ('guarantor_releaseHippaInfo',null,'true','guarantor_releaseHippaInfo', target.guarantor_releaseHippaInfo,null),
 ('guar_sex', source.guar_sex, case
@@ -409,7 +411,7 @@ CROSS JOIN LATERAL (VALUES
     when  source.parent is not null AND length(source.guar_zip::text) > 5 AND length(source.guar_zip::text) < 9 THEN LPAD(source.guar_zip::text, 9, '0')
     when  source.parent is not null AND length(source.guar_zip::text) > 9 THEN substring(source.guar_zip::text, '^\d{1,5}')
     when  source.parent is not null AND (length(source.guar_zip::text) = 5 OR length(source.zip::text) = 9 ) THEN source.guar_zip::text
-	when  source.parent is not null AND (source.guar_zip::text) IS NULL THEN '00000' 
+	when  source.parent is not null AND (source.guar_zip::text) IS NULL THEN source.zip::text 
  	when  source.parent is null AND (source.zip::text) IS NULL THEN '00000' 
  	end::text,'guarantor_address_zip', target.guarantor_address_zip, null),	
 ('guar_email', source.guar_email, case
@@ -489,9 +491,18 @@ CROSS JOIN LATERAL (VALUES
 		else NULL 
 		end::text, null),
 ('NS_guar_emailtype', '',CASE
-	 WHEN source.guar_email='' or source.guar_email IS NULL THEN NULL
-	 ELSE '5'
-	 end,'guarantor_email_type', target.guarantor_email_type, null)
-
+	 WHEN source.guar_email IS NOT NULL THEN '5'
+     when source.parent is null AND source.email IS NOT NULL THEN '5'
+	 --when source.parent is not null AND (source.guar_email is null OR source.guar_email ='') THEN NULL
+	 end,'guarantor_email_type', target.guarantor_email_type, null),
+('guar_preferred_contact',source.guar_preferred_contact,CASE
+	 WHEN source.guar_preferred_contact IS NULL THEN NULL
+     WHEN source.guar_preferred_contact = 'EMAIL' THEN 2
+	 WHEN source.guar_preferred_contact = 'PHONE' THEN 1
+     WHEN source.guar_preferred_contact = 'LETTER' THEN 1
+	 end,'guar_preferred_contact', target.guarantor_email_type, null)
+					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+
+
