@@ -26,8 +26,4 @@ CROSS JOIN LATERAL (VALUES
 						
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
-/*
-select vital_signs->0->>'PatientStats_systolic_bp' from v_source_exam_vital_signs
-where uid='BB8E7DFAC8B2192D30F6520B0CEC0101'
---'vital_signs'->>'PatientStats_systolic_bp'
-[{"PatientStats_date": "2020-12-10","PatientStats_systolic_bp": "120","PatientStats_diastolic_bp": "90"}]  */
+
