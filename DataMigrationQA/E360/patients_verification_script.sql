@@ -363,7 +363,8 @@ CROSS JOIN LATERAL (VALUES
  	when source.subscriber_relationship = 'PARENT' THEN 122
  	when source.subscriber_relationship = 'GRANDPARENT' THEN 4
  	when source.subscriber_relationship = 'DOMESTIC_PARTNER' THEN 53
- 	ELSE 21
+    when source.parent IS NOT NULL AND  source.subscriber_relationship IS NULL  THEN 21
+ 	ELSE 99
 	end::text,'guarantor_relationship', target.guarantor_relationship::text, null),
 ('guarantor_releaseHippaInfo',null,'true','guarantor_releaseHippaInfo', target.guarantor_releaseHippaInfo,null),
 ('guar_sex', source.guar_sex, case
@@ -499,10 +500,10 @@ CROSS JOIN LATERAL (VALUES
 	 end,'guarantor_email_type', target.guarantor_email_type, null),
 ('guar_preferred_contact',source.guar_preferred_contact,CASE
 	 WHEN source.guar_preferred_contact IS NULL THEN NULL
-     WHEN source.guar_preferred_contact = 'EMAIL' THEN 2
-	 WHEN source.guar_preferred_contact = 'PHONE' THEN 1
-     WHEN source.guar_preferred_contact = 'LETTER' THEN 1
-	 end,'guar_preferred_contact', target.guarantor_email_type, null)
+     WHEN source.guar_preferred_contact = 'EMAIL' THEN '2'
+	 WHEN source.guar_preferred_contact = 'PHONE' THEN '1'
+     WHEN source.guar_preferred_contact = 'LETTER' THEN '1'
+	 end,'guar_preferred_contact', target.guarantor, null)
 					
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;

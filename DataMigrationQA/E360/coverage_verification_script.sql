@@ -22,7 +22,13 @@ CROSS JOIN LATERAL (VALUES
 	when source.patins_type = '4' THEN 'COORDINATED'
 	else 'UNKNOWN'
 	end, 'insurancetype', target.insurancetype, null),															
---('insurance',source.insurance,source.insurance,'payer_id ', target.payer_id, null),																							
+--('insurance',source.insurance,source.insurance,'payer_id ', target.payer_id, null),	
+/*('sds_carrier_id', source.sds_carrier_id,CASE
+ 	WHEN source.sds_carrier_id IS NULL or source.sds_carrier_id ='' THEN 'VSP'
+ 
+    END,'Payor_name',target.payer_name,null),*/					
+				
+					
 --  ('plan',source.plan,source.plan,'plan_id ', target.plan_id, null),																							
 -- ('insurance_id',source.insurance_id,source.insurance_id,'insuranceId',target.insuranceId, null),																							
 ('group_number ',source.group_number,source.group_number,'group', target.group, null),																							
@@ -77,7 +83,10 @@ end,
 	when length(source.zip::text) = 5 OR length(source.zip::text) = 9  THEN source.zip::text
  	when source.zip::text IS NULL THEN '00000' 
 	end::text,'subscriber_zip', target.subscriber_zip, null),
-('emailtype','','5','subscriber_emailtype',target.subscriber_emailtype, null),
+('emailtype','',CASE 
+	 WHEN source.email IS NOT NULL THEN '5'
+	 ELSE NULL
+	 END,'subscriber_emailtype',target.subscriber_emailtype, null),
 ('email',source.email,source.email,'subscriber_email',target.subscriber_email, null),
 ('homephonetype','',CASE 
  	when source.homephone::text is null THEN null
@@ -143,7 +152,7 @@ end,
 ('payor_name',source.payor,CASE 
  WHEN source.payor IS NOT NULL THEN source.payor
  ELSE 'Routine - VSP - In-Network'
- END,'payer_name', target.payer_name, null)					
+ END,'payer_name', Upper(target.payer_name), null)					
 /*('cov_ins_back_id','',CASE 
  	when target.digitalassetsmasterbackuid::text is null THEN null
  	else target.digitalassetsmasterbackuid
