@@ -1,5 +1,5 @@
 DELETE FROM source_target_match WHERE  source_datasetId = 'glrx';
-
+--select * FROM source_target_match WHERE  source_datasetId = 'glrx' and matched ='FALSE' and target_value is not null
 INSERT INTO source_target_match (source_datasetId, source_id, source_field, source_value, expected_mapped_value, target_id, target_field, target_value, matched, notes)
 SELECT 
   'glrx' as source_datasetId,
@@ -7,11 +7,12 @@ SELECT
   match_tests.source_field, match_tests.source_value, match_tests.expected_mapped_value, 
   target._id as target_id, match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched, match_tests.notes
-FROM v_source_exam_glrx as source
-FULL JOIN v_migrated_glrx as target ON CONCAT(source.uid,'_glrx') = target.source_instanceId
+FROM v_source_exam_glrx_regular as source
+FULL JOIN v_migrated_glrx_reg as target ON CONCAT(source.uid,'_glrx') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 --('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
 --('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
+('sequence',source.sequence,source.sequence,'sequence',target.sequence,null),					
 ('r_add',source.r_add, case 
  when source.r_add is null THEN ''
  when source.r_add is not null THEN source.r_add end::text,'glrx.od.add',target.glrx_od_add,null),
@@ -29,14 +30,43 @@ CROSS JOIN LATERAL (VALUES
  							when source.l_sph is null THEN '' end::text,'glrx.os.sphere',target.glrx_os_sphere,null),
 ('l_cyl',source.l_cyl, case when source.l_cyl is not null THEN source.l_cyl
  						    when source.l_cyl is null THEN '' end::text,'glrx.os.cylinder',target.glrx_os_cylinder,null),
-('type',source.type, case when source.type is not null THEN source.type
- 						  when source.type is null THEN '' end::text,'glrx.type',target.glrx_type,null),	
+('type',source.glrx_type, case when source.glrx_type is not null THEN source.glrx_type
+ 						  when source.glrx_type is null THEN '' end::text,'glrx.type',target.glrx_type,null),	
 ('notes',source.notes,case when source.notes is not null THEN source.notes
  						 when source.notes is null THEN '' end::text,'glrx.notes',target.glrx_notes,null),
-('r_prism',source.r_prism, case when source.r_prism is not null THEN source.r_prism 
- 								when source.r_prism is null THEN '' end::text,'glrx.prism.od.p1',target.glrx_prism_od_p1,null),	
-('l_prism',source.l_prism, case when source.l_prism is not null THEN source.l_prism
- 								when source.l_prism is null THEN ''end::text,'glrx.prism.os.p1',target.glrx_prism_os_p1,null),
+('r_prism',concat(source.r_prism,source.r_base) , case 
+              when source.r_prism ='' THEN ''
+              when source.r_prism is not null and source.r_base ='UP' THEN concat(source.r_prism,'BU')
+              when source.r_prism is not null and source.r_base ='DOWN' THEN concat(source.r_prism,'BD')
+             when source.r_prism is not null and source.r_base ='IN' THEN concat(source.r_prism,'BI') 
+             when source.r_prism is not null and source.r_base ='OUT' THEN concat(source.r_prism,'BO') 
+             when source.r_prism is not null and source.r_base ='' THEN ''
+             
+ 
+ 			when source.r_prism is null THEN '' end::text,'glrx.prism.od.p1',target.glrx_prism_od_p1,null),	
+('r_cprism',concat(source.r_cprism,source.r_base) , case
+             when source.r_cprism ='' THEN ''
+             when source.r_cprism is not null and source.r_base ='UP' THEN concat(source.r_cprism,'BU')
+             when source.r_cprism is not null and source.r_base ='DOWN' THEN concat(source.r_cprism,'BD')
+             when source.r_cprism is not null and source.r_base ='IN' THEN concat(source.r_cprism,'BI') 
+             when source.r_cprism is not null and source.r_base ='OUT' THEN concat(source.r_cprism,'BO') 
+             when source.r_cprism is not null and source.r_base ='' THEN ''
+             when source.r_cprism is null and source.r_base is not null THEN ''
+ 			when source.r_cprism is null THEN '' end::text,'glrx.prism.od.p2',target.glrx_prism_od_p2,null),						
+('l_prism',concat(source.l_prism,source.l_base), case when source.l_prism ='' THEN ''
+      when source.l_prism is not null and source.l_base ='UP' THEN concat(source.l_prism,'BU')
+      when source.l_cprism is not null and source.l_base ='DOWN' THEN concat(source.l_cprism,'BD')
+      when source.l_prism is not null and source.l_base ='IN' THEN concat(source.l_prism,'BI') 
+      when source.l_prism is not null and source.l_base ='OUT' THEN concat(source.l_prism,'BO') 
+      when source.l_prism is not null and source.l_base ='' THEN ''
+      when source.l_prism is null and source.l_base is not null THEN ''
+      when source.l_base is null THEN ''end::text,'glrx.prism.os.p1',target.glrx_prism_os_p1,null),
+('l_cprism',concat(source.l_cprism,source.l_base) , case when source.l_cprism ='' THEN ''
+             when source.l_cprism is not null and source.l_base ='UP' THEN concat(source.l_cprism,'BU')
+             when source.l_cprism is not null and source.l_base ='DOWN' THEN concat(source.l_cprism,'BD')
+             when source.l_cprism is not null and source.l_base ='IN' THEN concat(source.l_cprism,'BI') 
+             when source.l_cprism is not null and source.l_base ='OUT' THEN concat(source.l_cprism,'BO') 
+             when source.l_cprism is null THEN '' end::text,'glrx.prism.os.p2',target.glrx_prism_os_p2,null),					
 ('expiration_reason',source.expiration_reason,case when source.expiration_reason is not null THEN source.expiration_reason
  													when source.expiration_reason is null THEN '' end::text,'glrx.changeReason',target.glrx_changereason,null),
 ('expiration_date',to_char(source.expiration_date, 'MM/DD/YYYY'),CASE 
