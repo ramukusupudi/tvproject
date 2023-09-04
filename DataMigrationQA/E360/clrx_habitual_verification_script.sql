@@ -10,8 +10,7 @@ SELECT
 FROM v_source_exam_clrx as source 
 LEFT JOIN v_migrated_CLRx as target ON CONCAT(source.uid,'_clrx_habitual1')  = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
 ('sequence',source.date::text,CASE
  WHEN source.is_habitual='true' THEN '1'

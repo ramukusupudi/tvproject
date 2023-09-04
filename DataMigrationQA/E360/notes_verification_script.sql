@@ -10,7 +10,6 @@ FULL JOIN v_migrated_notes as target ON source.uid = target.source_instanceid
 CROSS JOIN LATERAL (VALUES
 
 ('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceid',target.patient_sourceid,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableid',target.patient_targetid,null),
 ('category',source.category,source.category,'category',target.category,null),	
 ('type',source.type, case when source.type = '3' THEN 'ALERT'
                      when source.type = '2' THEN 'IMPORTANT'
@@ -24,13 +23,3 @@ CROSS JOIN LATERAL (VALUES
 											
 ) as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
-
-select source_datasetId, source_field, target_field, matched, notes, count(*)
-from source_target_match
-WHERE  source_datasetId = 'notes'
-group by source_datasetId, source_field, target_field, matched, notes
-order by source_field, matched is false
-
-select * from source_target_match
-where source_field = 'type'
-and source_datasetid = 'notes' and matched is false
