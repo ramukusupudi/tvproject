@@ -12,7 +12,7 @@ FROM v_source_patients as source
 FULL JOIN v_migrated_patients as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
   
-('designation', source.designation, case
+('designation', source.designation, CASE
 	when source.designation = 'Mr.' THEN 2
 	when source.designation = 'Mrs.' THEN 3
 	when source.designation = 'Ms.' THEN 5
