@@ -10,8 +10,8 @@ SELECT
 FROM v_source_systemic_allergy_history as source
 FULL JOIN v_migrated_allergies as target ON CONCAT(source.uid,'_systemic_allergy_history') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-('patientsrc',source.patientsrc,source.patientsrc,'patient_id',target.patient_id,null),
-('date',source.date,source.date,'appointmentdate',target.appointmentdate,null),
+('patientsrc',source.patient_src,source.patient_src,'patient_id',target.patient_id,null),
+('date',source.date::text,source.date::text,'appointmentdate',target.appointmentdate,null),
 ('allergylognotes',source.allergylognotes,source.allergylognotes,'allergylognotes',target.notes,null),
 ('rxnorm',source.rxnorm,source.rxnorm,'code',target.code,null),	
 ('allergienames',concat(source.allergienames,'*',source.allergy_name), case
