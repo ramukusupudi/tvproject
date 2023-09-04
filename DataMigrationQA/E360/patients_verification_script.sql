@@ -28,10 +28,10 @@ CROSS JOIN LATERAL (VALUES
 	else '1700-01-01'
 	end::text, 'dob', target.dob::text, null),
 --('NS_age',(source.birthday::date)::text,EXTRACT(year FROM age('2023-02-25'::date,birthday::date))::text,'age', target.age,null),
-('sex', source.sexs, case
-	when source.sexs = 'F' THEN '1'
-	when source.sexs = 'M' THEN '2'
-	when source.sexs = 'UNK' THEN '3'
+('sex', source.sex, case
+	when source.sex = 'F' THEN '1'
+	when source.sex = 'M' THEN '2'
+	when source.sex = 'UNK' THEN '3'
 	else '3' 
 	end::text,
 	'sex', target.sex::text, null),
