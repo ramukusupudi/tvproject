@@ -14,7 +14,6 @@ FULL JOIN public.v_migrated_testorder as target ON CONCAT(source.uid,'_test_orde
 CROSS JOIN LATERAL (VALUES
                                         
 --('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
 
 ('patient_targetId', target.patient_id, target.patient_id,'order_patient_id', target.order_patient_id, null),

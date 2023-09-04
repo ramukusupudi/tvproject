@@ -10,7 +10,6 @@ FULL JOIN v_migrated_notes as target ON source.uid = target.source_instanceid
 CROSS JOIN LATERAL (VALUES
 
 ('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceid',target.patient_sourceid,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableid',target.patient_targetid,null),
 ('category',source.category,source.category,'category',target.category,null),	
 ('type',source.type, case when source.type = '3' THEN 'ALERT'
                      when source.type = '2' THEN 'IMPORTANT'
