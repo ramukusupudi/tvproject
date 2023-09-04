@@ -12,8 +12,8 @@ FROM v_source_exam_vision_acuities as source
 FULL JOIN v_migrated_visionacuity as target ON CONCAT(source.uid,'_visual_acuities') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 
-('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),
+--('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
 ('acuity_n_od', source.acuity_n_od, case
        when source.acuity_n_type = 'N' AND source.acuity_n_od !='/null/' THEN source.acuity_n_od
