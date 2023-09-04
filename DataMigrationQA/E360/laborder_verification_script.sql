@@ -12,7 +12,7 @@ SELECT
 FROM v_source_lab as source
 FULL JOIN v_migrated_laborder as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-   ('patient',source.patient_src,source.patient_src,'patient_source_instanceid ', target.patient_source_instanceid, null),
+   ('patient',source.patient_src,source.patient_src,'patient_source_instanceid', target.patient_source_instanceid, null),
     ('provider_uid',source.provider_src::text, source.provider_src::text, 'provider_source_instanceid', target.provider_source_instanceid::text, null),
 	('location',source.location_src::text,source.location_src::text,'location_source_instanceid ', target.office_source_instanceid::text, null),
 	('order_number',source.order_number,source.order_number,'orderNumber',target.orderNumber::text, null),
