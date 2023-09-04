@@ -10,9 +10,9 @@ SELECT
   target._id as target_id,match_tests.target_field, match_tests.target_value,
   match_tests.expected_mapped_value is not distinct from match_tests.target_value as matched,match_tests.notes
 FROM v_source_locations as source
-FULL JOIN v_migrated_location as target ON source.uid = target.source_instanceId
+FULL JOIN v_migrated_offices as target ON source.uid = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
-	('brand', source.brand::text, source.brand::text, 'brand_id', target.brandid::text, null),				 
+	('brand', source.brand::text, source.brand::text, 'brand_id', target.brand_id::text, null),				 
   	('name', source.name::text, source.name::text, 'name', target.name::text, null),				
   	('city', source.city::text, source.city::text, 'city', target.city::text, null),
 	('state', source.state::text, source.state::text, 'state', target.state::text, null),
