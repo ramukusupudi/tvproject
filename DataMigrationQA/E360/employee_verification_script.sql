@@ -25,9 +25,9 @@ CROSS JOIN LATERAL (VALUES
 ('mi',source.mi,source.mi,'mi', target.mi,null),
 ('birthday',source.birthday::text,source.birthday::text,'dob', target.dob::text,null),
 ('email',source.email,TRIM(source.email),'email', target.email,null),
-('sex', source.sex, case
-	when source.sex = 'M' THEN 11
-	when source.sex = 'F' THEN 12
+('sex', source.sexs, case
+	when source.sexs = 'M' THEN 11
+	when source.sexs = 'F' THEN 12
 	else NULL 
 	end::text,'sex_key', target.sex_key::text, null),					
 ('available',source.available::text,source.available::text,'available', target.available,null),
@@ -110,9 +110,9 @@ CROSS JOIN LATERAL (VALUES
  WHEN source.provider is null OR source.on_line is null THEN false
  WHEN source.provider is not null AND source.on_line is not null THEN source.on_line
  end::text,'onlineProvider', target.onlineProvider,null),
-('scope',source.scope,CASE 
+('scope',source.state::text,CASE 
  WHEN source.provider is null THEN null
- WHEN source.provider is not null THEN source.scope
+ WHEN source.provider is not null THEN source.state::text
  end::text,'license_state',target.license_state,null)
 --('dea_ids',source.dea_ids::text,source.dea_ids::text,'dea', target.dea,null)
 
