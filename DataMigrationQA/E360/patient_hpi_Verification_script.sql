@@ -28,3 +28,4 @@ CROSS JOIN LATERAL (VALUES
   end,'technician_id',target.technician_id,null)				
  )as match_tests(source_field, source_value, expected_mapped_value, target_field, target_value, notes)
 ;
+--select * FROM source_target_match WHERE  source_datasetId = 'patient_hpi' and matched ='FALSE' and target_value is not null
