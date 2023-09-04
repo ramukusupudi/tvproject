@@ -11,8 +11,8 @@ FROM v_source_exam_patient_notes as source
 FULL JOIN v_migrated_patient_notes as target ON CONCAT(source.uid,'_patient_notes')  = target.source_instanceid 
 CROSS JOIN LATERAL (VALUES
 
-('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),
+--('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),					
 ('exams_notes',source.notes,CASE
  WHEN source.notes ='/null/' OR source.notes IS NULL  THEN ''
