@@ -15,8 +15,6 @@ CROSS JOIN LATERAL (VALUES
                                         
 --('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
-
-('patient_targetId', target.patient_id, target.patient_id,'order_patient_id', target.order_patient_id, null),
 ('date', source.date::text, TO_CHAR(source.date::date, 'MM/DD/YYYY'),'startdate', target.startdate, null),
 ('type', source.type, CASE 
          WHEN source.type= 'com.foxparksoftware.growemr.examsheet.clarkson.CornealTopographySheet' THEN '01348458-2f3f-4c17-ab74-e7c28061ce8b'
