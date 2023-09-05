@@ -13,7 +13,6 @@ FULL JOIN v_migrated_visionacuity as target ON CONCAT(source.uid,'_visual_acuiti
 CROSS JOIN LATERAL (VALUES
 
 ('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),
---('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),
 ('acuity_n_od', source.acuity_n_od, case
        when source.acuity_n_type = 'N' AND source.acuity_n_od !='/null/' THEN source.acuity_n_od

@@ -11,8 +11,7 @@ FROM public.v_source_exam_binocular as source
 FULL JOIN v_migrated_binocular as target ON CONCAT(source.uid,'_binocular') = target.source_instanceId
 CROSS JOIN LATERAL (VALUES
 					
-('patient_src',source.patient_src::text,source.patient_src::text,patient_sourceId,target.patient_sourceId,null),
-('patient_targetId',target.patient_id::text,target.patient_id::text,'patient_tableId',target.patient_targetId,null),
+('patient_src',source.patient_src::text,source.patient_src::text,'patient_sourceId',target.patient_sourceId,null),
 ('date',source.date::text,TO_CHAR(source.date::date, 'MM/DD/YYYY'),'AppointmentDate',target.AppointmentDate,null),					
 ('npc',source.npc,CASE 
  WHEN source.npc ='/null/' OR source.npc is  null THEN ''
